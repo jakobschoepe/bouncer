@@ -8,4 +8,4 @@ Coming soon.
 #### How do I cite the `bouncR` package?
 Coming soon.
 #### Why is the package called `bouncR`?
-`bouncR`is a portmanteau word composed of **bo**otstrapping, **uncer**tainty and **R** referring to its purpose and the duty of a bouncer - ensure safety. 
+`bouncR`is a portmanteau word composed of **bo**otstrapping, **unc**ertainty and **R** referring to its purpose and the duty of a bouncer - ensure safety. 

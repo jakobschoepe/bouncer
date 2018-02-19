@@ -121,7 +121,7 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 }
                 
                 # Export required objects to each node
-                parallel::clusterExport(cl = cluster, varlist = c('data', 'f'))
+                parallel::clusterExport(cl = cluster, varlist = c('data', 'f'), envir = environment())
                 
                 # Set seed for L'Ecuyer's pseudorandom number generator
                 parallel::clusterSetRNGStream(cl = cluster, iseed = seed)

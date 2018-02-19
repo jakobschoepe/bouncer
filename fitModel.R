@@ -21,6 +21,7 @@
 setClass(Class = "bouncR", representation = representation(obs = "matrix", betas = "matrix"))
 
 fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
+              # Check arguments
               if(!is.function(x = f)) {
                 stop("\"f\" must be a function")
               }

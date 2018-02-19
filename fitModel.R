@@ -1,7 +1,7 @@
 # File: fitModel.R
 # Version: 0.1.0
 # Author: Jakob Schöpe
-# Date: February 16, 2018
+# Date: February 19, 2018
 #
 # Copyright (C) 2018 Jakob Schöpe
 #
@@ -20,41 +20,91 @@
 
 setClass(Class = "bouncR", representation = representation(obs = "matrix", betas = "matrix"))
 
-fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
-              if(!is.data.frame(x = data)) {
-                stop("data type must be data frame")
+fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
+              if(!is.function(x = f)) {
+                stop("\"f\" must be a function")
+              }
+  
+              else if(any(!is.element(el = c("i", "data", "size", "replace"), set = names(x = formals(fun = f))))) {
+                stop("\"f\" must contain the following arguments: \"i\", \"data\", \"size\" and \"replace\"")
+              }
+  
+              else if(!is.data.frame(x = data)) {
+                stop("\"data\" must be a data frame")
+              }
+                
+              else if(!is.integer(x = size)) {
+                stop("\"size\" must be a positive integer")
               }
               
-              else if((isTRUE(x = replace) & k > choose(n = nrow(x = data) + size - 1, k = size)) | (!isTRUE(x = replace) & k > choose(n = nrow(x = data), k = size))) {
-                stop("chosen sample size is to large")
+              else if(size < 1) {
+                stop("\"size\" must be a positive integer")
+              }
+                
+              else if(length(x = size) > 1) {
+                stop("single positive integer for \"size\" expected")
+              }
+                
+              else if(size > nrow(x = data)) {
+                stop("\"size\" exceeds available number of observations")
               }
               
-              else if(!is.numeric(x = k)) {
-                stop("\"k\" must be numeric")
+              else if(!is.logical(x = replace)) {
+                stop("\"replace\" must be a logical value")
+              }
+                
+              else if(length(x = replace) > 1) {
+                stop("single logical value for \"replace\" expected")
+              }
+              
+              else if(!is.integer(x = k)) {
+                stop("\"k\" must be a positive integer equal to or greater 2")
+              }
+                
+              else if(k < 2) {
+                stop("\"k\" must be a positive integer equal to or greater 2")
               }
               
               else if(length(x = k) > 1) {
-                stop("single integer for \"k\" expected")
+                stop("single positive integer for \"k\" expected")
               }
               
-              else if(!is.numeric(x = seed)) {
-                stop("\"seed\" must be numeric")
+              else if(isTRUE(x = replace) & k > choose(n = nrow(x = data) + size - 1, k = size)) {
+                stop("\"size\" is to large considering ", k, " resampling replicates with replacement")
+              }
+              
+              else if(!isTRUE(x = replace) & k > choose(n = nrow(x = data), k = size)) {
+                stop("\"size\" is to large considering ", k, " resampling replicates without replacement")
+              }
+                               
+              else if(!is.integer(x = seed)) {
+                stop("\"seed\" must be an integer")
               }
               
               else if(length(x = seed) > 1) {
-                stop("single value for \"seed\" expected")
+                stop("single integer for \"seed\" expected")
               }
               
-              else if(!is.numeric(x = ncpus)) {
-                stop("\"ncpus\" must be numeric")
+              else if(!is.integer(x = ncpus)) {
+                stop("\"ncpus\" must be a positive integer")
+              }
+                
+              else if(ncpus < 1) {
+                stop("\"ncpus\" must be a positive integer")
+              }
+                
+              else if(length(x = ncpus) > 1) {
+                stop("single positive integer for \"ncpus\" expected")
               }
               
               else if(ncpus > parallel::detectCores()) {
-                stop("number of cores exceed number of detected cores")
+                stop("number of cores exceeds number of detected cores")
               }
               
-              else if(!missing(x = pkgs) & !is.character(x = pkgs)) {
-                stop("\"pkgs\" must be a character vector")
+              else if(!missing(x = pkgs)) {
+                if(!is.character(x = pkgs)) {
+                  stop("\"pkgs\" must be a character vector")
+                }
               }
               
               else {
@@ -76,7 +126,7 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
                 parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
                 
                 # Generate sets of pseudorandom resampling replicates and run 'f'
-                models <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace)
+                models <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace, ...)
               
                 # Shut down the cluster
                 parallel::stopCluster(cl = cluster)

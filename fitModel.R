@@ -25,7 +25,7 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
                 stop("data type must be data frame")
               }
               
-              else if((isTRUE(x = replace) & k > choose(n = nrow(data) + size - 1, k = size)) | (!isTRUE(x = replace) & k > choose(n = nrow(data), k = size))) {
+              else if((isTRUE(x = replace) & k > choose(n = nrow(x = data) + size - 1, k = size)) | (!isTRUE(x = replace) & k > choose(n = nrow(x = data), k = size))) {
                 stop("chosen sample size is to large")
               }
               
@@ -53,7 +53,7 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
                 stop("number of cores exceed number of detected cores")
               }
               
-              else if(!missing(pkgs) & !is.character(pkgs)) {
+              else if(!missing(x = pkgs) & !is.character(x = pkgs)) {
                 stop("\"pkgs\" must be a character vector")
               }
               
@@ -65,7 +65,7 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
                 cluster <- parallel::makePSOCKcluster(names = ncpus)
                 
                 # Load required packages on each node
-                if(!missing(pkgs)) {
+                if(!missing(x = pkgs)) {
                   parallel::clusterCall(cl = cluster, fun = lapply, X = pkgs, FUN = require, character.only = TRUE)
                 }
                 
@@ -85,16 +85,16 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
                 obs <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(match(x = models[[i]][[1]], table = 1:nrow(data))))}), fill = TRUE))
                 
                 # Sort columns of "obs"
-                obs <- obs[, order(as.integer(colnames(obs)))]
+                obs <- obs[, order(as.integer(x = colnames(x = obs)))]
                 
                 # Replace NAs in "obs" with zeros (?)
-                obs[is.na(obs)] <- 0
+                obs[is.na(x = obs)] <- 0
                 
                 # Create a matrix which contains the model parameters from each resampling replicate
                 betas <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = models[[i]][[2]])}), fill = TRUE))
                 
                 # Sort columns of "betas"
-                betas <- betas[, order(colnames(betas))]
+                betas <- betas[, order(colnames(x = betas))]
                 
                 # Create a new S4 "bouncR" object
                 OUTPUT <- new(Class = "bouncR", obs = obs, betas = betas)

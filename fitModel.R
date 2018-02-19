@@ -100,13 +100,7 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
               else if(ncpus > parallel::detectCores()) {
                 stop("number of cores exceeds number of detected cores")
               }
-              
-              else if(!missing(x = pkgs)) {
-                if(!is.character(x = pkgs)) {
-                  stop("\"pkgs\" must be a character vector")
-                }
-              }
-              
+                                          
               else {
                 # Add an identifier to each observation
                 data$id <- 1:nrow(x = data)
@@ -116,7 +110,13 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 
                 # Load required packages on each node
                 if(!missing(x = pkgs)) {
-                  parallel::clusterCall(cl = cluster, fun = lapply, X = pkgs, FUN = require, character.only = TRUE)
+                  if(!is.character(x = pkgs)) {
+                    parallel::stopCluster(cl = cluster)
+                    stop("\"pkgs\" must be a character vector")
+                  }
+                  else {
+                    parallel::clusterCall(cl = cluster, fun = lapply, X = pkgs, FUN = require, character.only = TRUE)
+                  }
                 }
                 
                 # Export required objects to each node

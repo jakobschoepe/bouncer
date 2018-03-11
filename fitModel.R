@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-setClass(Class = "bouncR", representation = representation(obs = "matrix", betas = "matrix"))
+setClass(Class = "bouncR", slots = c(obs = "matrix", betas = "matrix"))
 
 fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
               # Check arguments
@@ -127,13 +127,13 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
                 
                 # Generate sets of pseudorandom resampling replicates and run 'f'
-                models <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace, ...)
+                out <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace, ...)
               
                 # Shut down the cluster
                 parallel::stopCluster(cl = cluster)
                 
                 # Create a matrix which contains the counts of drawn realizations in each resampling replicate
-                obs <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(match(x = models[[i]][[1]], table = 1:nrow(data))))}), fill = TRUE))
+                obs <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(match(x = out[[i]][["obs"]], table = 1:nrow(data))))}), fill = TRUE))
                 
                 # Sort columns of "obs"
                 obs <- obs[, order(as.integer(x = colnames(x = obs)))]
@@ -142,7 +142,7 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 obs[is.na(x = obs)] <- 0
                 
                 # Create a matrix which contains the model parameters from each resampling replicate
-                betas <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = models[[i]][[2]])}), fill = TRUE))
+                betas <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = out[[i]][["betas"]])}), fill = TRUE))
                 
                 # Sort columns of "betas"
                 betas <- betas[, order(colnames(x = betas))]

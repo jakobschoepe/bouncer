@@ -1,7 +1,7 @@
 # File: fitModel.R
 # Version: 0.1.0
 # Author: Jakob Schöpe
-# Date: February 19, 2018
+# Date: March 11, 2018
 #
 # Copyright (C) 2018 Jakob Schöpe
 #

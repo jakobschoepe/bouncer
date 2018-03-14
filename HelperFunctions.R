@@ -21,11 +21,18 @@
 
 setMethod(f = "coef",
           signature = "bouncR",
-          definition = function(object, model = 1) {
-            betas <- selectModel(object = object, model = model)[[2]]
-            thetas <- sapply(X = 1:ncol(x = betas), FUN = function(i) {mean(x = betas[,i])})
-            names(x = thetas) <- colnames(x = betas)
-            return(thetas)
+          definition = function(object, model, na.action) {
+                    obj <- object@betas
+                    if(!missing(x = na.action)) {
+                              obj[which(x = is.na(x = obj))] <- na.action
+                    }
+                    
+                    if(!missing(x = model)) {
+                              
+                    }
+                    
+                    betas <- colMeans(x = obj, na.rm = TRUE)
+                    return(thetas)
           }
 )
 
@@ -61,27 +68,27 @@ setMethod(f = "confint",
 setMethod(f = "show",
           signature = "bouncR",
           definition = function(object) {
-                    
-                    
+                    obj <- summary(object)
+                    cat("\nSummary of the resampling process (k = ", nrow(x = object@obs), " with n = ", ncol(x = object@obs), ")\n\nNumber of unique resampling replicates: ", nrow(x = unique(x = object@obs)), "\nNumber of unique models: ", nrow(x = obj$frqM), "\n\n", sep = "")
+                    print(x = obj$frqM[1:3])
+                    cat("\nInclusion frequency of variables:\n", sep = "")
+                    print(x = obj$frqV)
+          }
+)
 
 
 setMethod(f = "summary", 
           signature = "bouncR", 
-          definition = function(object, show = "unqMod") {
+          definition = function(object) {
+                    obj <- object@betas
+                    k <- nrow(x = obj)
+                    frqM <- data.table::as.data.table(x = obj)
+                    frqM <- frqM[, .N, by = names(x = frqM)]
+                    frqM <- frqM[, Pr := N / k]
+                    frqM <- frqM[order(-N)]
+                    frqV <- colSums(x = obj) / k
                     
-                    betas <- object@betas
-                    
-                    if(show == "unqMod") {
-                              unqMod <- aggregate(cbind(as.data.frame(x = !is.na(x = betas))[0], Frequency = 1, as.data.frame(x = !is.na(x = betas)), FUN = length)
-                              unqMod$Probability <- unqMod$Frequency / nrow(x = betas)
-                              unqMod <- unqMod[order(x = unqMod[, ncol(x = unqMod)], decreasing = TRUE),]
-                              rownames(unqMod) <- NULL
-                              return(unqMod)
-                    } else if(show == "frqVar") {
-                              frqVar <- colSums(!is.na(x = betas) == TRUE) / nrow(x = betas)
-                              names(frqVar) <- colnames(x = betas)
-                              return(frqVar)
-                    }
+                    return(list(frqM = frqM[], frqV = frqV))
           }
 )
 

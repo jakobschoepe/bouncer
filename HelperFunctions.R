@@ -1,7 +1,7 @@
 # File: HelperFunctions.R
 # Version: 0.1.0
 # Author: Jakob Schöpe
-# Date: February 16, 2018
+# Date: March 14, 2018
 #
 # Copyright (C) 2018 Jakob Schöpe
 #
@@ -58,24 +58,30 @@ setMethod(f = "confint",
 )
 
 
+setMethod(f = "show",
+          signature = "bouncR",
+          definition = function(object) {
+                    
+                    
+
+
 setMethod(f = "summary", 
           signature = "bouncR", 
           definition = function(object, show = "unqMod") {
-            betas <- object@betas
-            
-            if(show == "unqMod") {
-              unqMod <- aggregate(cbind(as.data.frame(x = !is.na(x = betas))[0], Frequency = 1, as.data.frame(x = !is.na(x = betas)), FUN = length)
-              unqMod$Probability <- unqMod$Frequency / nrow(x = betas)
-              unqMod <- unqMod[order(x = unqMod[, ncol(x = unqMod)], decreasing = TRUE),]
-              rownames(unqMod) <- NULL
-              return(unqMod)
-            }
-            
-            else if(show == "frqVar") {
-              frqVar <- colSums(!is.na(x = betas) == TRUE) / nrow(x = betas)
-              names(frqVar) <- colnames(x = betas)
-              return(frqVar)
-            }
+                    
+                    betas <- object@betas
+                    
+                    if(show == "unqMod") {
+                              unqMod <- aggregate(cbind(as.data.frame(x = !is.na(x = betas))[0], Frequency = 1, as.data.frame(x = !is.na(x = betas)), FUN = length)
+                              unqMod$Probability <- unqMod$Frequency / nrow(x = betas)
+                              unqMod <- unqMod[order(x = unqMod[, ncol(x = unqMod)], decreasing = TRUE),]
+                              rownames(unqMod) <- NULL
+                              return(unqMod)
+                    } else if(show == "frqVar") {
+                              frqVar <- colSums(!is.na(x = betas) == TRUE) / nrow(x = betas)
+                              names(frqVar) <- colnames(x = betas)
+                              return(frqVar)
+                    }
           }
 )
 

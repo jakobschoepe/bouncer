@@ -39,30 +39,40 @@ setMethod(f = "coef",
 
 setMethod(f = "confint",
           signature = "bouncR",
-          definition = function(object, level, model = 1, ...) {
-            obs <- selectModel(object = object, model = model)[[1]]
-            betas <- selectModel(object = object, model = model)[[2]]
-            thetas <- coef(object = object, model = model)
-            pnames <- names(x = thetas)
-            parm <- 1:length(x = thetas)
-            alpha <- (1 - level) / 2
-            p <- c(alpha, 1 - alpha)
-            pct <- paste(format(100 * p, trim = TRUE, scientific = FALSE, digits = 3), "%", sep = "")
-            n <- nrow(x = betas)
-            df <- n - length(x = thetas)
-            q <- qt(p = p, df = df)
+          definition = function(object, level, model, method) {
+                    betaij <- object@betaij
+                    Oir <- object@Oir
+                    betaj <- colMeans(x = betaij, na.rm = TRUE)
+                    Or <- colMeans(x = Oir, na.rm = TRUE)
+                    alpha <- (1 - level) / 2
+                    j <- ncol(x = betaij)
+                    k <- nrow(x = betaij)
+                    df <- k - j
+                    p <- c(alpha, 1 - alpha)
+                    q <- qt(p = p, df = df)
+                    
+                    ci <- array(data = NA, dim = c(j, 2L), dimnames = list(names(betaj), paste(x = format(100 * p, trim = TRUE, scientific = FALSE, digits = 3), "%", sep = "")))
+                    
+                    if (method == "bcsi") {
+                                        
+                              }
+                    
+                    else if (method == "pi") {
+                              ci[] <- t(x = sapply(X = 1:j, function(i) {quantile(x = betaij[, i], prob = p, na.rm = TRUE)}))
+                              }
+                                        
+                    else if (method == "si") {
+                              sigmaj <- sapply(X = 1:j, function(i) {sqrt(x = sum(x = colSums(x = ((Oir - rep(x = Or, each = k)) * (betaij - rep(x = betaj, each = k))[, i]) / k, na.rm = TRUE)^2))})
+                              ci[] <- t(x = betaj + rep(x = q, each = j) * sigmaj)
+                              }
+                    
+                    else if (method == "sni") {
+                              
+                              }
             
-            dobs <- do.call(what = cbind, args = lapply(X = 1:ncol(obs), FUN = function(i) {obs[,i] - mean(obs[,i])}))
-            dbetas <- do.call(what = cbind, args = lapply(X = 1:ncol(betas), FUN = function(i) {betas[,i] - mean(betas[,i])}))
-            
-            sd <- sapply(X = 1:ncol(dbetas), FUN = function(i) {sqrt(x = sum(x = sapply(X = 1:ncol(x = dobs), FUN = function(ii) {sum(x = sapply(X = 1:nrow(x = dbetas), FUN = function(iii) {(dbetas[iii,i] * dobs[iii,ii]) / nrow(x = dbetas)}))^2})))})
-            ci <- array(data = NA, dim = c(length(parm), 2L), dimnames = list(parm, pct))
-            
-            ci[] <- t(x = sapply(X = 1:length(x = parm), FUN = function(i) {thetas[parm[i]] + q * sd[i]}))
-            
-            return(ci)
-          }
-)
+                    return(ci)
+                    }
+          )
 
 
 setMethod(f = "show",

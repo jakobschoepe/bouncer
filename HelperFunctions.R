@@ -56,7 +56,7 @@ setMethod(f = "confint",
                               o1 <- Oir - rep(x = Or, each = k)
                               o2 <- Oir - 1
                               b1 <- betaij - rep(x = betaj, each = k)
-                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X = 1:j, function(i) {sqrt(x = sum(x = colSums(x = (o1 * b1[, i]) / k, na.rm = TRUE)^2) - 1/(k)^2 * sum(x = colSums(x = ((o2 * b1[, i]) - colMeans(x = o2 * b1[, i]))^2)))}))
+                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X = 1:j, function(i) {sqrt(x = sum(x = colSums(x = (o1 * b1[, i]) / k, na.rm = TRUE)^2) - 1/(k)^2 * sum(x = colSums(x = ((o2 * b1[, i]) - colMeans(x = o2 * b1[, i], na.rm = TRUE))^2, na.rm = TRUE)))}))
                               }
                     
                     else if (method == "pi") {

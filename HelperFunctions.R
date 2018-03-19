@@ -41,20 +41,22 @@ setMethod(f = "confint",
           signature = "bouncR",
           definition = function(object, level, model, method) {
                     betaij <- object@betaij
-                    Oir <- object@Oir
                     betaj <- colMeans(x = betaij, na.rm = TRUE)
+                    Oir <- object@Oir
                     Or <- colMeans(x = Oir, na.rm = TRUE)
                     alpha <- (1 - level) / 2
                     j <- ncol(x = betaij)
                     k <- nrow(x = betaij)
-                    df <- k - j
                     p <- c(alpha, 1 - alpha)
-                    q <- qt(p = p, df = df)
+                    q <- qt(p = p, df = k - j)
                     
                     ci <- array(data = NA, dim = c(j, 2L), dimnames = list(names(betaj), paste(x = format(100 * p, trim = TRUE, scientific = FALSE, digits = 3), "%", sep = "")))
                     
                     if (method == "bcsi") {
-                                        
+                              o1 <- Oir - rep(x = Or, each = k)
+                              o2 <- Oir - 1
+                              b1 <- betaij - rep(x = betaj, each = k)
+                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X = 1:j, function(i) {sqrt(x = sum(x = colSums(x = (o1 * b1[, i]) / k, na.rm = TRUE)^2) - 1/(k)^2 * sum(x = colSums(x = ((o2 * b1[, i]) - colMeans(x = o2 * b1[, i]))^2)))}))
                               }
                     
                     else if (method == "pi") {
@@ -62,12 +64,11 @@ setMethod(f = "confint",
                               }
                                         
                     else if (method == "si") {
-                              sigmaj <- sapply(X = 1:j, function(i) {sqrt(x = sum(x = colSums(x = ((Oir - rep(x = Or, each = k)) * (betaij - rep(x = betaj, each = k))[, i]) / k, na.rm = TRUE)^2))})
-                              ci[] <- t(x = betaj + rep(x = q, each = j) * sigmaj)
+                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X = 1:j, function(i) {sqrt(x = sum(x = colSums(x = ((Oir - rep(x = Or, each = k)) * (betaij - rep(x = betaj, each = k))[, i]) / k, na.rm = TRUE)^2))}))
                               }
                     
                     else if (method == "sni") {
-                              
+                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X= 1:j, function(i) {sd(x = betaij[, i], na.rm = TRUE)}))
                               }
             
                     return(ci)

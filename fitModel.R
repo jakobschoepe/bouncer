@@ -1,7 +1,7 @@
 # File: fitModel.R
 # Version: 0.1.0
 # Author: Jakob Schöpe
-# Date: March 11, 2018
+# Date: March 19, 2018
 #
 # Copyright (C) 2018 Jakob Schöpe
 #
@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-setClass(Class = "bouncR", slots = c(obs = "matrix", betas = "matrix"))
+setClass(Class = "bouncR", slots = c(oir = "matrix", betaij = "matrix"))
 
 fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
               # Check arguments
@@ -127,30 +127,30 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
                 
                 # Generate sets of pseudorandom resampling replicates and run 'f'
-                out <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace, ...)
+                output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace, ...)
               
                 # Shut down the cluster
                 parallel::stopCluster(cl = cluster)
                 
                 # Create a matrix which contains the counts of drawn realizations in each resampling replicate
-                obs <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(match(x = out[[i]][["obs"]], table = 1:nrow(data))))}), fill = TRUE))
+                oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(match(x = output[[i]][["oir"]], table = 1:nrow(data))))}), fill = TRUE))
                 
-                # Sort columns of "obs"
-                obs <- obs[, order(as.integer(x = colnames(x = obs)))]
+                # Sort columns of "oir"
+                oir <- oir[, order(as.integer(x = colnames(x = oir)))]
                 
-                # Replace NAs in "obs" with zeros (?)
-                obs[is.na(x = obs)] <- 0
+                # Replace NAs in "oir" with zeros
+                oir[is.na(x = oir)] <- 0
                 
                 # Create a matrix which contains the model parameters from each resampling replicate
-                betas <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = out[[i]][["betas"]])}), fill = TRUE))
+                betaij <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["betaij"]])}), fill = TRUE))
                 
                 # Sort columns of "betas"
-                betas <- betas[, order(colnames(x = betas))]
+                betaij <- betaij[, order(colnames(x = betaij))]
                 
-                # Create a new S4 "bouncR" object
-                OUTPUT <- new(Class = "bouncR", obs = obs, betas = betas)
+                # Create a new S4 object
+                OUTPUT <- new(Class = "bouncR", oir = oir, betaij = betaij)
                 
-                # Return the S4 "bouncR" object
+                # Return the S4 object
                 return(OUTPUT)
               }
 }

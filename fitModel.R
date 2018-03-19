@@ -18,7 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-setClass(Class = "bouncR", slots = c(oir = "matrix", betaij = "matrix"))
+setClass(Class = "peims", slots = c(oir = "matrix", betaij = "matrix"))
 
 fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
               # Check arguments
@@ -148,7 +148,7 @@ fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 betaij <- betaij[, order(colnames(x = betaij))]
                 
                 # Create a new S4 object
-                OUTPUT <- new(Class = "bouncR", oir = oir, betaij = betaij)
+                OUTPUT <- new(Class = "peims", oir = oir, betaij = betaij)
                 
                 # Return the S4 object
                 return(OUTPUT)

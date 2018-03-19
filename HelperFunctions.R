@@ -20,7 +20,7 @@
 
 
 setMethod(f = "coef",
-          signature = "bouncR",
+          signature = "peims",
           definition = function(object, model, na.action) {
                     obj <- object@betaij
                     if(!missing(x = na.action)) {
@@ -38,7 +38,7 @@ setMethod(f = "coef",
 
 
 setMethod(f = "confint",
-          signature = "bouncR",
+          signature = "peims",
           definition = function(object, level = .95, model, method = "bcsi") {
                     betaij <- object@betaij
                     betaj <- colMeans(x = betaij, na.rm = TRUE)
@@ -79,7 +79,7 @@ setMethod(f = "confint",
 
 
 setMethod(f = "show",
-          signature = "bouncR",
+          signature = "peims",
           definition = function(object) {
                     obj <- summary(object)
                     cat("\nSummary of the resampling process (k = ", nrow(x = object@obs), " with n = ", ncol(x = object@obs), ")\n\nNumber of unique resampling replicates: ", nrow(x = unique(x = object@obs)), "\nNumber of unique models: ", nrow(x = obj$frqM), "\n\n", sep = "")
@@ -91,7 +91,7 @@ setMethod(f = "show",
 
 
 setMethod(f = "summary", 
-          signature = "bouncR", 
+          signature = "peims", 
           definition = function(object) {
                     obj <- object@betas
                     k <- nrow(x = obj)

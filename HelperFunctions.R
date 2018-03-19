@@ -1,7 +1,7 @@
 # File: HelperFunctions.R
 # Version: 0.1.0
 # Author: Jakob Schöpe
-# Date: March 14, 2018
+# Date: March 19, 2018
 #
 # Copyright (C) 2018 Jakob Schöpe
 #

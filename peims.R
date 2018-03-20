@@ -24,7 +24,7 @@
 setClass(Class = "peims", slots = c(oir = "matrix", betaij = "matrix"))
 
 peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
-              # Check arguments
+              # Check passing arguments to smoothly run subsequent computations 
               if(!is.function(x = f)) {
                 stop("\"f\" must be a function")
               }
@@ -106,13 +106,13 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
               }
                                           
               else {
-                # Add an identifier to each observation
+                # Add an identifier to each observation to subsequently compute frequencies of drawn observations
                 data$id <- 1:nrow(x = data)
                 
-                # Set up a cluster for parallel processing
+                # Set up a cluster for parallel processing to speed up resampling and model fitting
                 cluster <- parallel::makePSOCKcluster(names = ncpus)
                 
-                # Load required packages on each node
+                # Load required packages on each node to initialize parallel processing
                 if(!missing(x = pkgs)) {
                   if(!is.character(x = pkgs)) {
                     parallel::stopCluster(cl = cluster)
@@ -123,34 +123,39 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                   }
                 }
                 
-                # Export required objects to each node
+                # Export required objects to each node to initialize parallel processing
                 parallel::clusterExport(cl = cluster, varlist = c('data', 'f'), envir = environment())
                 
-                # Set seed for L'Ecuyer's pseudorandom number generator
+                # Set seed for L'Ecuyer's pseudorandom number generator to be able to repeat resampling and model fitting
                 parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
                 
-                # Generate sets of pseudorandom resampling replicates and run 'f'
+                # Generate sets of pseudorandom resampling replicates and run 'f' to obtain parameter estimates
                 output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace, ...)
               
                 # Shut down the cluster
                 parallel::stopCluster(cl = cluster)
                 
-                # Create a matrix which contains the counts of drawn realizations in each resampling replicate
+                # Create a matrix which contains frequencies indicating how often a particular observations was drawn in 
+                # each resampling replicate to subsequently compute bootstrap covariances for confidence interval estimation 
+                # of parameter estimates (Note: NAs indicate zero frequency, but are transformed below!)
                 oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(match(x = output[[i]][["oir"]], table = 1:nrow(data))))}), fill = TRUE))
                 
-                # Sort columns of "oir"
+                # Arrange columns of 'oir' for reasons of clarity
                 oir <- oir[, order(as.integer(x = colnames(x = oir)))]
                 
-                # Replace NAs in "oir" with zeros
+                # Replace NAs in 'oir' with zeros to indicate correct frequencies (see above)
                 oir[is.na(x = oir)] <- 0
                 
-                # Create a matrix which contains the model parameters from each resampling replicate
+                # Create a matrix which contains parameter estimates from model fitting in each resampling replicate to
+                # subsequently assess instability in model selection and to compute bagged parameter estimates and their 
+                # corresponding confidence intervals
                 betaij <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["betaij"]])}), fill = TRUE))
                 
-                # Sort columns of "betaij"
+                # Sort columns of 'betaij' for reasons of clarity
                 betaij <- betaij[, order(colnames(x = betaij))]
                 
-                # Create a new S4 object
+                # Create a new S4 object which contains 'oir' and 'betaij' to subsequently use corresponding generic functions 
+                # for further computations
                 OUTPUT <- new(Class = "peims", oir = oir, betaij = betaij)
                 
                 # Return the S4 object

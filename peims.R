@@ -154,13 +154,8 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 
                 # Sort columns of 'betaij' for reasons of clarity
                 betaij <- betaij[, order(colnames(x = betaij))]
-                
-                # Create a new S4 object which contains 'oir' and 'betaij' to subsequently use corresponding generic functions 
-                # for further computations
-                OUTPUT <- new(Class = "peims", oir = oir, betaij = betaij)
-                
-                # Return the S4 object
-                return(OUTPUT)
+                                                
+                return(new(Class = "peims", oir = oir, betaij = betaij))
                 }
               }
 }

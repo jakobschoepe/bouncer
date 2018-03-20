@@ -25,83 +25,83 @@ setClass(Class = "peims", slots = c(oir = "matrix", betaij = "matrix"))
 
 peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
               # Check passed arguments to smoothly run subsequent computations 
-              if(!is.function(x = f)) {
+              if (!is.function(x = f)) {
                 stop("\"f\" must be a function")
               }
   
-              else if(any(!is.element(el = c("i", "data", "size", "replace"), set = names(x = formals(fun = f))))) {
+              else if (any(!is.element(el = c("i", "data", "size", "replace"), set = names(x = formals(fun = f))))) {
                 stop("\"f\" must contain the following arguments: \"i\", \"data\", \"size\" and \"replace\"")
               }
   
-              else if(!is.data.frame(x = data)) {
+              else if (!is.data.frame(x = data)) {
                 stop("\"data\" must be a data frame")
               }
                 
-              else if(!is.integer(x = size)) {
+              else if (!is.integer(x = size)) {
                 stop("\"size\" must be a positive integer")
               }
               
-              else if(size < 1) {
+              else if (size < 1) {
                 stop("\"size\" must be a positive integer")
               }
                 
-              else if(length(x = size) > 1) {
+              else if (length(x = size) > 1) {
                 stop("single positive integer for \"size\" expected")
               }
                 
-              else if(size > nrow(x = data)) {
+              else if (size > nrow(x = data)) {
                 stop("\"size\" exceeds available number of observations")
               }
               
-              else if(!is.logical(x = replace)) {
+              else if (!is.logical(x = replace)) {
                 stop("\"replace\" must be a logical value")
               }
                 
-              else if(length(x = replace) > 1) {
+              else if (length(x = replace) > 1) {
                 stop("single logical value for \"replace\" expected")
               }
               
-              else if(!is.integer(x = k)) {
+              else if (!is.integer(x = k)) {
                 stop("\"k\" must be a positive integer equal to or greater 2")
               }
                 
-              else if(k < 2) {
+              else if (k < 2) {
                 stop("\"k\" must be a positive integer equal to or greater 2")
               }
               
-              else if(length(x = k) > 1) {
+              else if (length(x = k) > 1) {
                 stop("single positive integer for \"k\" expected")
               }
               
-              else if(isTRUE(x = replace) & k > choose(n = nrow(x = data) + size - 1, k = size)) {
+              else if (isTRUE(x = replace) & k > choose(n = nrow(x = data) + size - 1, k = size)) {
                 stop("\"size\" is to large considering ", k, " resampling replicates with replacement")
               }
               
-              else if(!isTRUE(x = replace) & k > choose(n = nrow(x = data), k = size)) {
+              else if (!isTRUE(x = replace) & k > choose(n = nrow(x = data), k = size)) {
                 stop("\"size\" is to large considering ", k, " resampling replicates without replacement")
               }
                                
-              else if(!is.integer(x = seed)) {
+              else if (!is.integer(x = seed)) {
                 stop("\"seed\" must be an integer")
               }
               
-              else if(length(x = seed) > 1) {
+              else if (length(x = seed) > 1) {
                 stop("single integer for \"seed\" expected")
               }
               
-              else if(!is.integer(x = ncpus)) {
+              else if (!is.integer(x = ncpus)) {
                 stop("\"ncpus\" must be a positive integer")
               }
                 
-              else if(ncpus < 1) {
+              else if (ncpus < 1) {
                 stop("\"ncpus\" must be a positive integer")
               }
                 
-              else if(length(x = ncpus) > 1) {
+              else if (length(x = ncpus) > 1) {
                 stop("single positive integer for \"ncpus\" expected")
               }
               
-              else if(ncpus > parallel::detectCores()) {
+              else if (ncpus > parallel::detectCores()) {
                 stop("number of cores exceeds number of detected cores")
               }
                                           
@@ -113,8 +113,8 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 cluster <- parallel::makePSOCKcluster(names = ncpus)
                 
                 # Load required packages on each node to initialize parallel processing
-                if(!missing(x = pkgs)) {
-                  if(!is.character(x = pkgs)) {
+                if (!missing(x = pkgs)) {
+                  if (!is.character(x = pkgs)) {
                     parallel::stopCluster(cl = cluster)
                     stop("\"pkgs\" must be a character vector")
                   }
@@ -122,7 +122,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                     parallel::clusterCall(cl = cluster, fun = lapply, X = pkgs, FUN = require, character.only = TRUE)
                   }
                 }
-                
+                else {
                 # Export required objects to each node to initialize parallel processing
                 parallel::clusterExport(cl = cluster, varlist = c('data', 'f'), envir = environment())
                 
@@ -160,5 +160,6 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 
                 # Return the S4 object
                 return(OUTPUT)
+                }
               }
 }

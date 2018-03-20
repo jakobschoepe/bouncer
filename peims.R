@@ -1,7 +1,10 @@
-# File: fitModel.R
-# Version: 0.1.0
+# File: peims.R
+# Package: peims
+# Version: 0.2.0
 # Author: Jakob Schöpe
 # Date: March 19, 2018
+#
+# Dependencies: data.table, parallel, pbapply
 #
 # Copyright (C) 2018 Jakob Schöpe
 #
@@ -20,7 +23,7 @@
 
 setClass(Class = "peims", slots = c(oir = "matrix", betaij = "matrix"))
 
-fitModel <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
+peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
               # Check arguments
               if(!is.function(x = f)) {
                 stop("\"f\" must be a function")

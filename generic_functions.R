@@ -21,7 +21,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-
 setMethod(f = "coef",
           signature = "peims",
           definition = function(object, model, na.action) {
@@ -108,8 +107,8 @@ setMethod(f = "summary",
           signature = "peims", 
           definition = function(object) {
                     # Check if parameter estimates from preceding model fitting are missing to 
-                    # subsequently compute frequencies of unique models and variables to indicate 
-                    # instability in model selection
+                    # subsequently compute frequencies of unique models and included variables 
+                    # to indicate instability in model selection
                     obj <- !is.na(x = object@betaij)
                     
                     # 'k' indicates the number of resampling replicates for further computations
@@ -126,41 +125,13 @@ setMethod(f = "summary",
                     # model selection
                     frqM <- frqM[, Pr := N / k]
                     
-                    # Order data table to create a rank order of frequencies of unique models
+                    # Arrange data table to create a rank order of frequencies of unique models
                     frqM <- frqM[order(-N)]
                     
                     # Compute relative frequencies of included variables to indicate instability in 
                     # model selection
                     frqV <- colSums(x = obj) / k
                     
-                    # Return 'frqM' and 'frqV' as a list
                     return(list(frqM = frqM[], frqV = frqV))
           }
 )
-
-
-selectModel <- function(object, model = 1) {
-                  # Identify all unique models
-                  unqMod <- summary(object)
-                  
-                  # Select model
-                  selMod <- unqMod[model, 1:(ncol(unqMod)-2)]
-                  
-                  # Create an index
-                  i <- which(x = apply(X = !is.na(object@betas), MARGIN = 1, FUN = function(x) {all(x == selMod)}))
-                  
-                  # Create a matrix which contains model parameters
-                  betas <- object@betas[i,]
-                  
-                  # Identify excluded covariates
-                  na <- unique(x = which(x = is.na(betas), arr.ind = TRUE)[,2])
-                  
-                  # Delete excluded covariates/columns from "betas"
-                  if(length(x = na) > 0) {
-                    betas <- as.matrix(x = betas[,-na])
-                  }
-                  
-                  obs <- object@obs[i,]
-                  
-                  return(list(obs, betas, i))
-               }

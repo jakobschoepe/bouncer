@@ -2,7 +2,7 @@
 # Package: peims
 # Version: 0.2.0
 # Author: Jakob Schöpe
-# Date: March 19, 2018
+# Date: March 20, 2018
 #
 # Dependencies: data.table, parallel, pbapply
 #

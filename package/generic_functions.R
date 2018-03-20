@@ -118,7 +118,8 @@ setMethod(f = "subset",
                               # Remove columns with missing parameter estimates 
                               set(x = tmp, j = unique(x = which(x = is.na(x = tmp), arr.ind = TRUE)[, 2]), value = NULL)
                     
-                              # Cast data table into matrix to run subsequent computations more efficient
+                              # Cast data table into matrix to run subsequent computations more 
+                              # efficient
                               as.matrix(tmp)
                               }
                     )
@@ -133,13 +134,14 @@ setMethod(f = "summary",
                     # Check if parameter estimates from preceding model fitting are missing to 
                     # subsequently compute frequencies of unique models and included variables 
                     # to indicate instability in model selection
-                    obj <- !is.na(x = object@betaij)
+                    tmp01 <- !is.na(x = object@betaij)
                     
                     # 'k' indicates the sets of resampling replicates for further computations
-                    k <- nrow(x = obj)
+                    k <- nrow(x = tmp01)
                     
-                    # Cast matrix into data table to compute frequencies of unique models easier
-                    frqM <- data.table::as.data.table(x = obj)
+                    # Cast matrix into data table to compute frequencies of unique models more
+                    # efficient
+                    frqM <- data.table::as.data.table(x = tmp01)
                     
                     # Compute absolute frequencies of unique models to indicate instability in 
                     # model selection
@@ -152,8 +154,8 @@ setMethod(f = "summary",
                     # Arrange data table to create a rank order of frequencies of unique models
                     frqM <- frqM[order(-N)]
                     
-                    # Compute relative frequencies of included variables to indicate instability in 
-                    # model selection
+                    # Compute relative frequencies of included variables to indicate instability 
+                    # in model selection
                     frqV <- colSums(x = obj) / k
                     
                     return(list(frqM = frqM[], frqV = frqV))

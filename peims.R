@@ -147,7 +147,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 # Create a matrix which contains the model parameters from each resampling replicate
                 betaij <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["betaij"]])}), fill = TRUE))
                 
-                # Sort columns of "betas"
+                # Sort columns of "betaij"
                 betaij <- betaij[, order(colnames(x = betaij))]
                 
                 # Create a new S4 object

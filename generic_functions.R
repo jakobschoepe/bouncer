@@ -134,4 +134,3 @@ selectModel <- function(object, model = 1) {
                   
                   return(list(obs, betas, i))
                }
-)

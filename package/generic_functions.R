@@ -38,7 +38,6 @@ setMethod(f = "coef",
           }
 )
 
-
 setMethod(f = "confint",
           signature = "peims",
           definition = function(object, level = .95, model, method = "bcsi") {
@@ -78,8 +77,7 @@ setMethod(f = "confint",
             
                     return(ci)
                     }
-          )
-
+)
 
 setMethod(f = "show",
           signature = "peims",
@@ -102,6 +100,32 @@ setMethod(f = "show",
           }
 )
 
+setMethod(f = "subset",
+          signature = "peims",
+          definition = function(x) {
+                    # Cast matrix into data table to subset matching models more efficient      
+                    tmp01 <- data.table::as.data.table(x = object@betaij)
+                    
+                    # Add an identifier for matching models to subset them
+                    tmp02 <- data.table::as.data.table(x = !is.na(x = tmp01))
+                    tmp02 <- tmp02[, i := .GRP, by = names(x = tmp02)]
+                    
+                    # 
+                    tmp03 <- lapply(X = 1:max(x = tmp02[, i]), FUN = function(j) {
+                              # Subset matching models to be able to  
+                              tmp <- tmp01[tmp02[i==j, which = TRUE]]
+                    
+                              # Remove columns with missing parameter estimates 
+                              set(x = tmp, j = unique(x = which(x = is.na(x = tmp), arr.ind = TRUE)[, 2]), value = NULL)
+                    
+                              # Cast data table into matrix to run subsequent computations more efficient
+                              as.matrix(tmp)
+                              }
+                    )
+                    
+                    return(tmp03[order(vapply(X = tmp03, FUN = length, FUN.VALUE = 1L), decreasing = TRUE)])
+          }
+)
 
 setMethod(f = "summary", 
           signature = "peims", 
@@ -111,7 +135,7 @@ setMethod(f = "summary",
                     # to indicate instability in model selection
                     obj <- !is.na(x = object@betaij)
                     
-                    # 'k' indicates the number of resampling replicates for further computations
+                    # 'k' indicates the sets of resampling replicates for further computations
                     k <- nrow(x = obj)
                     
                     # Cast matrix into data table to compute frequencies of unique models easier

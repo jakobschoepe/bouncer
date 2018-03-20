@@ -43,6 +43,7 @@ setMethod(f = "coef",
 setMethod(f = "confint",
           signature = "peims",
           definition = function(object, level = .95, model, method = "bcsi") {
+                    # Store 
                     betaij <- object@betaij
                     betaj <- colMeans(x = betaij, na.rm = TRUE)
                     oir <- object@oir
@@ -85,7 +86,17 @@ setMethod(f = "show",
           signature = "peims",
           definition = function(object) {
                     obj <- summary(object)
-                    cat("\nSummary of the resampling process (k = ", nrow(x = object@obs), " with n = ", ncol(x = object@obs), ")\n\nNumber of unique resampling replicates: ", nrow(x = unique(x = object@obs)), "\nNumber of unique models: ", nrow(x = obj$frqM), "\n\n", sep = "")
+                    cat("\nSummary of the resampling process (k = ", 
+                        nrow(x = object@oir), 
+                        " with n = ", 
+                        ncol(x = object@oir), 
+                        ")\n\nNumber of unique resampling replicates: ", 
+                        nrow(x = unique(x = object@oir)), 
+                        "\nNumber of unique models: ", 
+                        nrow(x = obj$frqM), 
+                        "\n\n", 
+                        sep = ""
+                    )
                     print(x = obj$frqM[1:3])
                     cat("\nInclusion frequency of variables:\n", sep = "")
                     print(x = obj$frqV)
@@ -96,14 +107,33 @@ setMethod(f = "show",
 setMethod(f = "summary", 
           signature = "peims", 
           definition = function(object) {
-                    obj <- object@betas
+                    # Check if parameter estimates from preceding model fitting are missing to 
+                    # subsequently compute frequencies of unique models and variables to indicate 
+                    # instability in model selection
+                    obj <- !is.na(x = object@betaij)
+                    
+                    # 'k' indicates the number of resampling replicates for further computations
                     k <- nrow(x = obj)
+                    
+                    # Cast matrix into data table to compute frequencies of unique models easier
                     frqM <- data.table::as.data.table(x = obj)
+                    
+                    # Compute absolute frequencies of unique models to indicate instability in 
+                    # model selection
                     frqM <- frqM[, .N, by = names(x = frqM)]
+                    
+                    # Compute relative frequencies of unique models to indicate instability in 
+                    # model selection
                     frqM <- frqM[, Pr := N / k]
+                    
+                    # Order data table to create a rank order of frequencies of unique models
                     frqM <- frqM[order(-N)]
+                    
+                    # Compute relative frequencies of included variables to indicate instability in 
+                    # model selection
                     frqV <- colSums(x = obj) / k
                     
+                    # Return 'frqM' and 'frqV' as a list
                     return(list(frqM = frqM[], frqV = frqV))
           }
 )

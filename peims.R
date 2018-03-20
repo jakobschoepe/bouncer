@@ -24,7 +24,7 @@
 setClass(Class = "peims", slots = c(oir = "matrix", betaij = "matrix"))
 
 peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
-              # Check passing arguments to smoothly run subsequent computations 
+              # Check passed arguments to smoothly run subsequent computations 
               if(!is.function(x = f)) {
                 stop("\"f\" must be a function")
               }

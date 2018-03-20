@@ -1,7 +1,10 @@
-# File: HelperFunctions.R
-# Version: 0.2.1
+# File: generic_functions.R
+# Package: peims
+# Version: 0.2.0
 # Author: Jakob Schöpe
-# Date: March 19, 2018
+# Date: March 20, 2018
+#
+# Dependencies: data.table
 #
 # Copyright (C) 2018 Jakob Schöpe
 #

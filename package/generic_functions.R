@@ -23,24 +23,14 @@
 
 setMethod(f = "coef",
           signature = "peims",
-          definition = function(object, model, na.action) {
-                    obj <- object@betaij
-                    if(!missing(x = na.action)) {
-                              obj[which(x = is.na(x = obj))] <- na.action
-                    }
-                    
-                    if(!missing(x = model)) {
-                              
-                    }
-                    
-                    betas <- colMeans(x = obj, na.rm = TRUE)
-                    return(thetas)
+          definition = function(object) {
+                    return(colMeans(x = object@betaij, na.rm = TRUE))
           }
 )
 
 setMethod(f = "confint",
           signature = "peims",
-          definition = function(object, level = .95, model, method = "bcsi") {
+          definition = function(object, level = .95, method = "bcsi") {
                     # Store 
                     betaij <- object@betaij
                     betaj <- colMeans(x = betaij, na.rm = TRUE)
@@ -52,27 +42,27 @@ setMethod(f = "confint",
                     p <- c(alpha, 1 - alpha)
                     q <- qt(p = p, df = k - j)
                     
-                    ci <- array(data = NA, dim = c(j, 2L), dimnames = list(names(betaj), paste(x = format(100 * p, trim = TRUE, scientific = FALSE, digits = 3), "%", sep = "")))
+                    ci <- array(data = NA, dim = c(j, 2L), dimnames = list(names(x = betaj), paste(x = format(x = 100 * p, digits = 3, scientific = FALSE, trim = TRUE), "%", sep = "")))
                     
                     if (method == "bcsi") {
                               o1 <- oir - rep(x = or, each = k)
                               o2 <- oir - 1
                               b1 <- betaij - rep(x = betaj, each = k)
-                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X = 1:j, function(i) {sqrt(x = sum(x = colSums(x = (o1 * b1[, i]) / k, na.rm = TRUE)^2) - 1/(k)^2 * sum(x = colSums(x = ((o2 * b1[, i]) - colMeans(x = o2 * b1[, i], na.rm = TRUE))^2, na.rm = TRUE)))}))
+                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X = 1:j, FUN = function(i) {sqrt(x = sum(x = colSums(x = (o1 * b1[, i]) / k, na.rm = TRUE)^2) - 1/(k)^2 * sum(x = colSums(x = ((o2 * b1[, i]) - colMeans(x = o2 * b1[, i], na.rm = TRUE))^2, na.rm = TRUE)))}))
                               }
                     
                     else if (method == "pcti") {
-                              ci[] <- t(x = sapply(X = 1:j, function(i) {quantile(x = betaij[, i], prob = p, na.rm = TRUE)}))
+                              ci[] <- t(x = sapply(X = 1:j, FUN = function(i) {quantile(x = betaij[, i], prob = p, na.rm = TRUE)}))
                               }
                                         
                     else if (method == "smoi") {
                               o1 <- oir - rep(x = or, each = k)
                               b1 <- betaij - rep(x = betaj, each = k)
-                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X = 1:j, function(i) {sqrt(x = sum(x = colSums(x = (o1 * b1[, i]) / k, na.rm = TRUE)^2))}))
+                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X = 1:j, FUN = function(i) {sqrt(x = sum(x = colSums(x = (o1 * b1[, i]) / k, na.rm = TRUE)^2))}))
                               }
                     
                     else if (method == "stdi") {
-                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X= 1:j, function(i) {sd(x = betaij[, i], na.rm = TRUE)}))
+                              ci[] <- t(x = betaj + rep(x = q, each = j) * sapply(X= 1:j, FUN = function(i) {sd(x = betaij[, i], na.rm = TRUE)}))
                               }
             
                     return(ci)
@@ -102,20 +92,16 @@ setMethod(f = "show",
 
 setMethod(f = "subset",
           signature = "peims",
-          definition = function(x, m) {
-                    # Cast matrix into data table to subset matching models more efficient      
+          definition = function(x, model = 1) {
                     betaij <- data.table::as.data.table(x = x@betaij)
                     oir <- data.table::as.data.table(x = x@oir)
-                    
-                    # Add an identifier for matching models to subset them
                     tmpVar <- data.table::as.data.table(x = !is.na(x = betaij))
                     tmpVar <- tmpVar[, n := .N, by = names(x = tmpVar)]
                     tmpVar <- tmpVar[, id := 1:nrow(x = tmpVar)]
-                    tmpVar <- tmpVar[order(x = n, decreasing = TRUE)]
+                    tmpVar <- tmpVar[order(n, decreasing = TRUE)]
                     tmpVar <- tmpVar[, m := .GRP, by = eval(names(x = betaij))]
-                    i <- tmpVar[m == m, id]
-                    
-                    betaij <- as.matrix(betaij[i])
+                    i <- tmpVar[m == model, id]
+                    betaij <- as.matrix(set(x = betaij[i], j = unique(x = which(x = is.na(x = betaij[i]), arr.ind = TRUE)[, 2]), value = NULL))
                     oir <- as.matrix(oir[i])
                     
                     return(new(Class = "peims", oir = oir, betaij = betaij)) 

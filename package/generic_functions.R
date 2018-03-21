@@ -70,23 +70,26 @@ setMethod(f = "confint",
 )
 
 setMethod(f = "show",
-          signature = "peims",
+          signature = c("summary", "peims"),
           definition = function(object) {
-                    obj <- summary(object)
                     cat("\nSummary of the resampling process (k = ", 
-                        nrow(x = object@oir), 
+                        nrow(x = object@betaij), 
                         " with n = ", 
                         ncol(x = object@oir), 
                         ")\n\nNumber of unique resampling replicates: ", 
                         nrow(x = unique(x = object@oir)), 
                         "\nNumber of unique models: ", 
-                        nrow(x = obj$frqM), 
-                        "\n\n", 
+                        nrow(x = object@frqM), 
+                        "\n\nEstimates from bagging with correponding bias-corrected smoothed confidence intervals\n", 
                         sep = ""
                     )
-                    print(x = obj$frqM[1:3])
-                    cat("\nInclusion frequency of variables:\n", sep = "")
-                    print(x = obj$frqV)
+                    
+                    print(x = object@estm)
+                    
+                    cat("\nInclusion frequency of variables:\n", 
+                        sep = ""
+                    )
+                    print(x = object$frqV)
           }
 )
 
@@ -111,17 +114,25 @@ setMethod(f = "subset",
 setMethod(f = "summary", 
           signature = "peims", 
           definition = function(object) {
+                    betaij <- object@betaij
+                    oir <- object@oir
                     # Check if parameter estimates from preceding model fitting are missing to 
                     # subsequently compute frequencies of unique models and included variables 
                     # to indicate instability in model selection
-                    tmp01 <- !is.na(x = object@betaij)
+                    tmpVar <- !is.na(x = betaij)
                     
                     # 'k' indicates the sets of resampling replicates for further computations
-                    k <- nrow(x = tmp01)
+                    k <- nrow(x = tmpVar)
+                    
+                    # 'n' indicates the number of observations in each set of resampling 
+                    # replicates
+                    n <- ncol(x = object@oir)
+                    
+                    estm <- cbind("Point estimate" = coef(object), confint(object))
                     
                     # Cast matrix into data table to compute frequencies of unique models more
                     # efficient
-                    frqM <- data.table::as.data.table(x = tmp01)
+                    frqM <- data.table::as.data.table(x = tmpVar)
                     
                     # Compute absolute frequencies of unique models to indicate instability in 
                     # model selection
@@ -132,12 +143,12 @@ setMethod(f = "summary",
                     frqM <- frqM[, Pr := N / k]
                     
                     # Arrange data table to create a rank order of frequencies of unique models
-                    frqM <- frqM[order(-N)]
+                    frqM <- frqM[order(N, decreasing = TRUE)]
                     
                     # Compute relative frequencies of included variables to indicate instability 
                     # in model selection
                     frqV <- colSums(x = obj) / k
                     
-                    return(list(frqM = frqM[], frqV = frqV))
+                    return(list(estm = estim, frqM = frqM[], frqV = frqV, oir = oir, betaij = betaij))
           }
 )

@@ -102,29 +102,23 @@ setMethod(f = "show",
 
 setMethod(f = "subset",
           signature = "peims",
-          definition = function(x) {
+          definition = function(x, m) {
                     # Cast matrix into data table to subset matching models more efficient      
-                    tmp01 <- data.table::as.data.table(x = object@betaij)
+                    betaij <- data.table::as.data.table(x = x@betaij)
+                    oir <- data.table::as.data.table(x = x@oir)
                     
                     # Add an identifier for matching models to subset them
-                    tmp02 <- data.table::as.data.table(x = !is.na(x = tmp01))
-                    tmp02 <- tmp02[, i := .GRP, by = names(x = tmp02)]
+                    tmpVar <- data.table::as.data.table(x = !is.na(x = betaij))
+                    tmpVar <- tmpVar[, n := .N, by = names(x = tmpVar)]
+                    tmpVar <- tmpVar[, id := 1:nrow(x = tmpVar)]
+                    tmpVar <- tmpVar[order(x = n, decreasing = TRUE)]
+                    tmpVar <- tmpVar[, m := .GRP, by = eval(names(x = betaij))]
+                    i <- tmpVar[m == m, id]
                     
-                    # 
-                    tmp03 <- lapply(X = 1:max(x = tmp02[, i]), FUN = function(j) {
-                              # Subset matching models to be able to  
-                              tmp <- tmp01[tmp02[i==j, which = TRUE]]
+                    betaij <- as.matrix(betaij[i])
+                    oir <- as.matrix(oir[i])
                     
-                              # Remove columns with missing parameter estimates 
-                              set(x = tmp, j = unique(x = which(x = is.na(x = tmp), arr.ind = TRUE)[, 2]), value = NULL)
-                    
-                              # Cast data table into matrix to run subsequent computations more 
-                              # efficient
-                              as.matrix(tmp)
-                              }
-                    )
-                    
-                    return(tmp03[order(vapply(X = tmp03, FUN = length, FUN.VALUE = 1L), decreasing = TRUE)])
+                    return(new(Class = "peims", oir = oir, betaij = betaij)) 
           }
 )
 

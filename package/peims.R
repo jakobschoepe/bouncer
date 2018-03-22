@@ -2,7 +2,7 @@
 # Package: peims
 # Version: 0.2.0
 # Author: Jakob Schöpe
-# Date: March 20, 2018
+# Date: March 22, 2018
 #
 # Dependencies: data.table, parallel, pbapply
 #
@@ -107,7 +107,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                                           
               else {
                 # Add an identifier to each observation to subsequently compute frequencies indicating how often a
-                # particular observation was drawn in each resampling replicate
+                # particular observation was drawn in each set of pseudorandom resampling replicates
                 data$id <- 1:nrow(x = data)
                 
                 # Set up a cluster for parallel processing to speed up resampling and model fitting
@@ -127,18 +127,18 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 # Export required objects to each node to initialize parallel processing
                 parallel::clusterExport(cl = cluster, varlist = c('data', 'f'), envir = environment())
                 
-                # Set seed for L'Ecuyer's pseudorandom number generator to be able to repeat resampling and model fitting
+                # Set seed for L'Ecuyer's pseudorandom number generator for reproducibility
                 parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
                 
-                # Generate sets of pseudorandom resampling replicates and run 'f' to obtain parameter estimates
+                # Generate sets of pseudorandom resampling replicates and run 'f' to obtain estimates of model parameters
                 output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace, ...)
               
                 # Shut down the cluster
                 parallel::stopCluster(cl = cluster)
                 
-                # Create a matrix which contains frequencies indicating how often a particular observations was drawn in 
-                # each resampling replicate to subsequently compute bootstrap covariances for confidence interval estimation 
-                # of parameter estimates (Note: NAs indicate zero frequency, but are transformed below!)
+                # Create a matrix which contains frequencies indicating how often a particular observation was drawn in 
+                # each set of resampling replicates to subsequently compute bootstrap covariances for confidence interval estimation 
+                # for estimates of model parameters (Note: NAs indicate zero frequency, but are transformed below!)
                 oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(match(x = output[[i]][["oir"]], table = 1:nrow(data))))}), fill = TRUE))
                 
                 # Arrange columns of 'oir' for reasons of clarity
@@ -147,9 +147,9 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 # Replace NAs in 'oir' with zeros to indicate correct frequencies (see above)
                 oir[is.na(x = oir)] <- 0
                 
-                # Create a matrix which contains parameter estimates from model fitting in each resampling replicate to
-                # subsequently assess instability in model selection and to compute bagged parameter estimates and their 
-                # corresponding confidence intervals
+                # Create a matrix which contains estimates of model parameters from model fitting in each set of resampling replicates to
+                # subsequently assess instability in model selection and to compute smoothed estimates through bagging with their 
+                # corresponding confidence intervals 
                 betaij <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["betaij"]])}), fill = TRUE))
                 
                 # Sort columns of 'betaij' for reasons of clarity

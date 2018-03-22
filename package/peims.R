@@ -130,15 +130,16 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 # Set seed for L'Ecuyer's pseudorandom number generator for reproducibility
                 parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
                 
-                # Generate sets of pseudorandom resampling replicates and run 'f' to obtain estimates of model parameters
+                # Run 'f' on each node to obtain estimates of model parameters from model fitting in each set of 
+                # pseudorandom resampling replicates  
                 output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace, ...)
               
                 # Shut down the cluster
                 parallel::stopCluster(cl = cluster)
                 
                 # Create a matrix which contains frequencies indicating how often a particular observation was drawn in 
-                # each set of resampling replicates to subsequently compute bootstrap covariances for confidence interval estimation 
-                # for estimates of model parameters (Note: NAs indicate zero frequency, but are transformed below!)
+                # each set of pseudorandom resampling replicates to subsequently compute bootstrap covariances for 
+                # confidence interval estimation (Note: NAs indicate zero frequency, but are transformed below!)
                 oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(match(x = output[[i]][["oir"]], table = 1:nrow(data))))}), fill = TRUE))
                 
                 # Arrange columns of 'oir' for reasons of clarity
@@ -147,9 +148,9 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 # Replace NAs in 'oir' with zeros to indicate correct frequencies (see above)
                 oir[is.na(x = oir)] <- 0
                 
-                # Create a matrix which contains estimates of model parameters from model fitting in each set of resampling replicates to
-                # subsequently assess instability in model selection and to compute smoothed estimates through bagging with their 
-                # corresponding confidence intervals 
+                # Create a matrix which contains estimates of model parameters from model fitting in each set of pseudorandom 
+                # resampling replicates to subsequently assess instability in model selection and to compute smoothed estimates 
+                # through bagging with their corresponding confidence intervals 
                 betaij <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["betaij"]])}), fill = TRUE))
                 
                 # Sort columns of 'betaij' for reasons of clarity

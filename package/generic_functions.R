@@ -2,7 +2,7 @@
 # Package: peims
 # Version: 0.2.0
 # Author: Jakob Schöpe
-# Date: March 20, 2018
+# Date: March 22, 2018
 #
 # Dependencies: data.table
 #
@@ -23,19 +23,48 @@
 
 setMethod(f = "coef",
           signature = "peims",
-          definition = function(object) {
-                    return(colMeans(x = object@betaij, na.rm = TRUE))
+          definition = function(object, weighted = FALSE) {
+                    
+                    betaij <- object@betaij
+                    
+                    if (!isTRUE(x = weighted)) {
+                              # Compute smoothed estimates of model parameters through unweighted bagging
+                              betaj <- colMeans(x = betaij, na.rm = TRUE)
+                    }
+                    
+                    else {
+                              # Cast matrix into data table to compute weights for each set of pseudorandom
+                              # resampling replicates more efficient
+                              tmp <- data.table::as.data.table(x = !is.na(x = betaij))
+                              
+                              # Compute weights for each set of pseudorandom resampling replicates to 
+                              # subsequently compute smoothed estimates of model parameters through
+                              # weighted bagging
+                              w <- tmp[, m := .N, by = names(tmp)][["m"]]
+                              
+                              # Compute smoothed estimates of model parameters through weighted bagging
+                              betaj <- colSums(x = w * betaij, na.rm = TRUE) / sum(x = w)
+                    }
+                    return(betaj)
           }
 )
 
 setMethod(f = "confint",
           signature = "peims",
-          definition = function(object, level = .95, method = "bcsi") {
-                    # Store 
+          definition = function(object, level = .95, method = "bcsi", weighted = FALSE) {
+                    
                     betaij <- object@betaij
-                    betaj <- colMeans(x = betaij, na.rm = TRUE)
+                    betaj <- coef(object, weighted = weighted)
                     oir <- object@oir
-                    or <- colMeans(x = oir, na.rm = TRUE)
+                    
+                    if (!isTRUE(weighted)) {
+                              or <- colMeans(x = oir, na.rm = TRUE)
+                    }
+                    
+                    else {
+                              or <- 
+                    }
+                    
                     alpha <- (1 - level) / 2
                     j <- ncol(x = betaij)
                     k <- nrow(x = betaij)
@@ -70,43 +99,29 @@ setMethod(f = "confint",
 )
 
 setMethod(f = "show",
-          signature = c("summary", "peims"),
+          signature = "peims",
           definition = function(object) {
-                    cat("\nSummary of the resampling process (k = ", 
-                        nrow(x = object@betaij), 
-                        " with n = ", 
-                        ncol(x = object@oir), 
-                        ")\n\nNumber of unique resampling replicates: ", 
-                        nrow(x = unique(x = object@oir)), 
-                        "\nNumber of unique models: ", 
-                        nrow(x = object@frqM), 
-                        "\n\nEstimates from bagging with correponding bias-corrected smoothed confidence intervals\n", 
-                        sep = ""
-                    )
-                    
-                    print(x = object@estm)
-                    
-                    cat("\nInclusion frequency of variables:\n", 
-                        sep = ""
-                    )
-                    print(x = object$frqV)
+                    summary(object)                    
           }
 )
 
 setMethod(f = "subset",
           signature = "peims",
           definition = function(x, model = 1) {
+                    
+                    # Cast matrices into data tables to subsequently subset more efficient
                     betaij <- data.table::as.data.table(x = x@betaij)
                     oir <- data.table::as.data.table(x = x@oir)
-                    tmpVar <- data.table::as.data.table(x = !is.na(x = betaij))
-                    tmpVar <- tmpVar[, n := .N, by = names(x = tmpVar)]
-                    tmpVar <- tmpVar[, id := 1:nrow(x = tmpVar)]
-                    tmpVar <- tmpVar[order(n, decreasing = TRUE)]
-                    tmpVar <- tmpVar[, m := .GRP, by = eval(names(x = betaij))]
-                    i <- tmpVar[m == model, id]
-                    betaij <- as.matrix(set(x = betaij[i], j = unique(x = which(x = is.na(x = betaij[i]), arr.ind = TRUE)[, 2]), value = NULL))
-                    oir <- as.matrix(oir[i])
                     
+                    # ???
+                    betaij[, m := do.call(what = paste0, args = lapply(X = .SD, FUN = function(x) {+is.na(x = x)}))]
+                    oir[, m := betaij[["m"]]]
+                    tmp <- betaij[, .N, by = m][order(N, decreasing = TRUE), i := .I][, setorder(x = .SD, cols = i)]
+                    
+                    # Subset data tables conditional on argument 'model'
+                    betaij <- as.matrix(x = betaij[tmp[i == model, m], on = .(m), nomatch = 0, !"m"][, Filter(f = function(x) {!anyNA(x = x)}, x = .SD)])
+                    oir <- as.matrix(x = oir[tmp[i == model, m], on = .(m), nomatch = 0, !"m"])
+                                        
                     return(new(Class = "peims", oir = oir, betaij = betaij)) 
           }
 )
@@ -149,6 +164,17 @@ setMethod(f = "summary",
                     # in model selection
                     frqV <- colSums(x = obj) / k
                     
-                    return(list(estm = estim, frqM = frqM[], frqV = frqV, oir = oir, betaij = betaij))
+                    return(list(estm = estim, frqV = frqV))
+          }
+)
+
+                                                                               
+setMethod(f = "unique",
+          signature = "peims",
+          definition = function(x) {
+                    betaij <- data.table::as.data.table(x = !is.na(x = x@betaij))
+                    betaij <- betaij[, .N, by = names(betaij)][order(N, decreasing = TRUE)]
+                    
+                    return(betaij)
           }
 )

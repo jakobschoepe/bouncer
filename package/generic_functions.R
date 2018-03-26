@@ -72,12 +72,12 @@ setMethod(f = "confint",
                     }
 )
 
-setMethod(f = "show",
-          signature = "peims",
-          definition = function(object) {
-                    summary(object)                    
-          }
-)
+#setMethod(f = "show",
+#          signature = "peims",
+#          definition = function(object) {
+#                    summary(object)                    
+#          }
+#)
 
 setMethod(f = "subset",
           signature = "peims",
@@ -100,47 +100,47 @@ setMethod(f = "subset",
           }
 )
 
-setMethod(f = "summary", 
-          signature = "peims", 
-          definition = function(object) {
-                    betaij <- object@betaij
-                    oir <- object@oir
-                    # Check if parameter estimates from preceding model fitting are missing to 
-                    # subsequently compute frequencies of unique models and included variables 
-                    # to indicate instability in model selection
-                    tmpVar <- !is.na(x = betaij)
-                    
-                    # 'k' indicates the sets of resampling replicates for further computations
-                    k <- nrow(x = tmpVar)
-                    
-                    # 'n' indicates the number of observations in each set of resampling 
-                    # replicates
-                    n <- ncol(x = object@oir)
-                    
-                    estm <- cbind("Point estimate" = coef(object), confint(object))
-                    
-                    # Cast matrix into data table to compute frequencies of unique models more
-                    # efficient
-                    frqM <- data.table::as.data.table(x = tmpVar)
-                    
-                    # Compute absolute frequencies of unique models to indicate instability in 
-                    # model selection
-                    frqM <- frqM[, .N, by = names(x = frqM)]
-                    
-                    # Compute relative frequencies of unique models to indicate instability in 
-                    # model selection
-                    frqM <- frqM[, Pr := N / k]
-                    
-                    # Arrange data table to create a rank order of frequencies of unique models
-                    frqM <- frqM[order(N, decreasing = TRUE)]
-                    
-                    # Compute relative frequencies of included variables to indicate instability 
-                    # in model selection
-                    frqV <- colSums(x = obj) / k
-                    
-                    return(list(estm = estim, frqV = frqV))
-          }
-)
+#setMethod(f = "summary", 
+#          signature = "peims", 
+#          definition = function(object) {
+#                    betaij <- object@betaij
+#                    oir <- object@oir
+#                    # Check if parameter estimates from preceding model fitting are missing to 
+#                    # subsequently compute frequencies of unique models and included variables 
+#                    # to indicate instability in model selection
+#                    tmpVar <- !is.na(x = betaij)
+#                    
+#                    # 'k' indicates the sets of resampling replicates for further computations
+#                    k <- nrow(x = tmpVar)
+#                    
+#                    # 'n' indicates the number of observations in each set of resampling 
+#                    # replicates
+#                    n <- ncol(x = object@oir)
+#                    
+#                    estm <- cbind("Point estimate" = coef(object), confint(object))
+#                    
+#                    # Cast matrix into data table to compute frequencies of unique models more
+#                    # efficient
+#                    frqM <- data.table::as.data.table(x = tmpVar)
+#                    
+#                    # Compute absolute frequencies of unique models to indicate instability in 
+#                    # model selection
+#                    frqM <- frqM[, .N, by = names(x = frqM)]
+#                    
+#                    # Compute relative frequencies of unique models to indicate instability in 
+#                    # model selection
+#                    frqM <- frqM[, Pr := N / k]
+#                    
+#                    # Arrange data table to create a rank order of frequencies of unique models
+#                    frqM <- frqM[order(N, decreasing = TRUE)]
+#                    
+#                    # Compute relative frequencies of included variables to indicate instability 
+#                    # in model selection
+#                    frqV <- colSums(x = obj) / k
+#                    
+#                    return(list(estm = estim, frqV = frqV))
+#          }
+#)
 
                                                                                
 setMethod(f = "unique",

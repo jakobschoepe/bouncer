@@ -2,7 +2,7 @@
 # Package: peims
 # Version: 0.2.0
 # Author: Jakob Schöpe
-# Date: March 22, 2018
+# Date: March 26, 2018
 #
 # Dependencies: data.table
 #
@@ -23,48 +23,22 @@
 
 setMethod(f = "coef",
           signature = "peims",
-          definition = function(object, weighted = FALSE) {
-                    
+          definition = function(object) {
                     betaij <- object@betaij
-                    
-                    if (!isTRUE(x = weighted)) {
-                              # Compute smoothed estimates of model parameters through unweighted bagging
-                              betaj <- colMeans(x = betaij, na.rm = TRUE)
-                    }
-                    
-                    else {
-                              # Cast matrix into data table to compute weights for each set of pseudorandom
-                              # resampling replicates more efficient
-                              tmp <- data.table::as.data.table(x = !is.na(x = betaij))
-                              
-                              # Compute weights for each set of pseudorandom resampling replicates to 
-                              # subsequently compute smoothed estimates of model parameters through
-                              # weighted bagging
-                              w <- tmp[, m := .N, by = names(tmp)][["m"]]
-                              
-                              # Compute smoothed estimates of model parameters through weighted bagging
-                              betaj <- colSums(x = w * betaij, na.rm = TRUE) / sum(x = w)
-                    }
+                    # Compute smoothed estimates of model parameters through bagging
+                    betaj <- colMeans(x = betaij, na.rm = TRUE)
                     return(betaj)
           }
 )
 
 setMethod(f = "confint",
           signature = "peims",
-          definition = function(object, level = .95, method = "bcsi", weighted = FALSE) {
+          definition = function(object, level = .95, method = "bcsi") {
                     
                     betaij <- object@betaij
-                    betaj <- coef(object, weighted = weighted)
+                    betaj <- colMeans(x = betaij, na.rm =TRUE)
                     oir <- object@oir
-                    
-                    if (!isTRUE(weighted)) {
-                              or <- colMeans(x = oir, na.rm = TRUE)
-                    }
-                    
-                    else {
-                              or <- 
-                    }
-                    
+                    or <- colMeans(x = oir, na.rm = TRUE)
                     alpha <- (1 - level) / 2
                     j <- ncol(x = betaij)
                     k <- nrow(x = betaij)

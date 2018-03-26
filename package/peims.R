@@ -2,7 +2,7 @@
 # Package: peims
 # Version: 0.2.0
 # Author: Jakob Schöpe
-# Date: March 22, 2018
+# Date: March 26, 2018
 #
 # Dependencies: data.table, parallel, pbapply
 #
@@ -123,7 +123,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                     parallel::clusterCall(cl = cluster, fun = lapply, X = pkgs, FUN = require, character.only = TRUE)
                   }
                 }
-                else {
+                
                 # Export required objects to each node to initialize parallel processing
                 parallel::clusterExport(cl = cluster, varlist = c('data', 'f'), envir = environment())
                 
@@ -157,6 +157,6 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
                 betaij <- betaij[, order(colnames(x = betaij))]
                                                 
                 return(new(Class = "peims", oir = oir, betaij = betaij))
-                }
+                
               }
 }

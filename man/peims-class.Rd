@@ -26,5 +26,3 @@ showClass("peims")
 	 }
 }
 \title{S4 Class \code{"peims"}}
-
-

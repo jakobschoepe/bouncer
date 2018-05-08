@@ -23,7 +23,7 @@ fit <- peims(f = f, data = mtcars, size = 32L, replace = TRUE, k = 1000L, seed =
 coef(fit)
 }
 \name{confint-methods}
-\references{Schöpe J & Wagenpfeil S (2018)}
+\references{Coming soon.}
 \title{Estimate the confidence limits for each model parameter}
 \usage{\S4method{confint}{peims}(object, level = .95, method = "bcsi")}
 \value{A matrix with columns giving the lower and upper confidence limits for each model parameter.}

@@ -6,4 +6,4 @@ Date: 2018-05-08
 Author: Jakob Schöpe
 Maintainer: Jakob Schöpe (<jas@med-imbei.uni-saarland.de>)
 Description: The peims package provides an efficient utility routine for assessing instability in model selection with subsequent parameter estimation using resampling methods and bagging methodology.
-License: GNU GPL Version 3 (<https://gnu.org/licenses/>)
+License: GPL-3

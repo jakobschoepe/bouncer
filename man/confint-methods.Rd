@@ -27,5 +27,3 @@ coef(fit)
 \title{Estimate the confidence limits for each model parameter}
 \usage{\S4method{confint}{peims}(object, level = .95, method = "bcsi")}
 \value{A matrix with columns giving the lower and upper confidence limits for each model parameter.}
-
-

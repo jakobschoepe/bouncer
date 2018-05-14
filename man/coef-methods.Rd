@@ -20,7 +20,7 @@ fit <- peims(f = f, data = mtcars, size = 32L, replace = TRUE, k = 1000L, seed =
 coef(fit)
 }
 \name{coef-methods}
-\references{Coming soon.}
+\references{Schöpe J & Wagenpfeil S (2018)}
 \title{Estimate the expected value of each model parameter}
 \usage{\S4method{coef}{peims}(object)}
 \value{A vector giving the expected value for each model parameter.}

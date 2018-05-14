@@ -1,13 +1,34 @@
+\name{peims-package}
 \alias{peims-package}
 \alias{peims}
-\author{Jakob Schöpe (\email{jas@med-imbei.uni-saarland.de})}
-\description{The \pkg{peims} package provides an efficient utility routine for assessing instability in model selection with subsequent parameter estimation using resampling methods and bagging methodology.}
-\details{}
 \docType{package}
-\name{peims-package}
-\references{
-Breiman L (1996) Bagging predictors. Mach Learn 24:123--140
-
-Efron B (2014) Estimation and accuracy after model selection. J Am Stat Assoc 109:991--1007
+\title{
+\packageTitle{peims}
 }
-\title{peims: Parameter estimation considering instability in model selection using resampling methods}
+\description{
+\packageDescription{peims}
+}
+\details{
+
+The DESCRIPTION file:
+\packageDESCRIPTION{peims}
+\packageIndices{peims}
+~~ An overview of how to use the package, including the most important functions ~~
+}
+\author{
+\packageAuthor{peims}
+
+Maintainer: \packageMaintainer{peims}
+}
+\references{
+~~ Literature or other references for background information ~~
+}
+~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
+\keyword{ package }
+\seealso{
+~~ Optional links to other man pages, e.g. ~~
+~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+}
+\examples{
+~~ simple examples of the most important functions ~~
+}

@@ -1,7 +1,7 @@
 Author: Jakob Schöpe
 BugReports: https://github.com/jakobschoepe/peims/issues
 Date: 2018-05-31
-Depends: R (>= 3.2.4), data.table (>= 1.10.4), parallel (>= 3.2.4), pbapply (>= 1.3-4)
+Depends: R (>= 3.2.4), data.table (>= 1.10.4), methods (>= 3.2.4), parallel (>= 3.2.4), pbapply (>= 1.3-4)
 Description: An efficient and flexible utility routine for assessing instability in model selection with subsequent parameter estimation using resampling methods and bagging methodology.
 Encoding: UTF-8
 License: GPL (>=3)

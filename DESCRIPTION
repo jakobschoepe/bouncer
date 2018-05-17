@@ -1,0 +1,15 @@
+Package: peims
+Type: Package
+Title: Parameter estimation considering instability in model selection
+Version: 0.2.0
+Date: 2018-05-31
+Author: Jakob Schöpe
+Maintainer: Jakob Schöpe <schoepe@med-imbei.uni-saarland.de>
+Description: An efficient and flexible utility routine for assessing instability in model selection with subsequent parameter estimation using resampling methods and bagging methodology.
+License: GPL (>=3)
+Encoding: UTF-8
+LazyData: true
+URL: https://github.com/jakobschoepe/peims
+BugReports: https://github.com/jakobschoepe/peims/issues
+Imports: data.table, methods, parallel, pbapply
+RoxygenNote: 6.0.1

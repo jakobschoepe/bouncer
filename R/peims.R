@@ -143,7 +143,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
     # Create a matrix which contains frequencies indicating how often a particular observation was drawn in
     # each set of pseudorandom resampling replicates to subsequently compute bootstrap covariances for
     # confidence interval estimation (Note: NAs indicate zero frequency, but are transformed below!)
-    oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(match(x = output[[i]][["oir"]], table = 1:nrow(data))))}), fill = TRUE))
+    oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(output[[i]][["oir"]]))}), fill = TRUE))
 
     # Arrange columns of 'oir' for reasons of clarity
     oir <- oir[, order(as.integer(x = colnames(x = oir)))]

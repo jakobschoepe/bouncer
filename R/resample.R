@@ -13,18 +13,21 @@
 resample <- function(i, data, size, replace, seed) {
   # If the argument 'seed' is provided, set the kind and the state of the pseudo-random number generator.
   if (!missing(x = seed)) {
-    RNGkind(kind = 'L'Ecuyer-CMRG')
+    RNGkind(kind = "L'Ecuyer-CMRG")
     .Random.seed <<- seed
   }
   
   # Store the current state of the pseudo-random number generator for reproducability.
-  seed_tmp <- .Random.seed
+  seed <- .Random.seed
   
   # Resample from the original sample.
   data_tmp <- data[sample(x = 1:nrow(x = data), size = size, replace = replace), ]
+
+  oir <- data_tmp$tmp_id
+  data_tmp$tmp_id <- NULL
   
   # Fit the user-defined model to the resampled data. 
-  fit_tmp <- f(data = data_tmp)
+  betaij <- f(data = data_tmp)
   
-  return(list(seed = seed_tmp, oir = data_tmp$id, betaij = fit_tmp))
+  return(list(seed = seed, oir = oir, betaij = betaij))
 }

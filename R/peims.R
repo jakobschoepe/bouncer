@@ -15,12 +15,11 @@
 #' \item{betaij}{A matrix containing the estimated model parameters of each resampling replicate.}
 #' @references Work in progress.
 #' @examples
-#' f <- function(i, data, size, replace) {
-#' data <- data[sample(x = 1:nrow(x = data), size = size, replace = replace),]
+#' f <- function(data) {
 #' null <- glm(formula = mpg ~ 1, family = gaussian, data = data)
-#' full <- glm(formula = mpg ~ . -id, family = gaussian, data = data)
+#' full <- glm(formula = mpg ~ ., family = gaussian, data = data)
 #' fit <- coef(step(object = null, scope = list(upper = full), direction = "both", trace = 0, k = 2))
-#' return(list(oir = data$id, betaij = fit))
+#' return(fit)
 #' }
 #'
 #' fit <- peims(f = f, data = mtcars, size = 32L, replace = TRUE, k = 10L, seed = 123L, ncpus = 2L)
@@ -32,12 +31,12 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
     stop("\"f\" must be a function")
   }
 
-  else if (any(!is.element(el = c("i", "data", "size", "replace"), set = names(x = formals(fun = f))))) {
-    stop("\"f\" must contain the following arguments: \"i\", \"data\", \"size\" and \"replace\"")
+  else if (!is.element(el = "data", set = names(x = formals(fun = f)))) {
+    stop("\"f\" must contain the following argument: \"data\"")
   }
 
-  else if (!is.data.frame(x = data)) {
-    stop("\"data\" must be a data frame")
+  else if (!is.data.frame(x = data) | !is.data.table(x = data)) {
+    stop("\"data\" must be a data frame or data table")
   }
 
   else if (!is.integer(x = size)) {
@@ -111,7 +110,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
   else {
     # Add an identifier to each observation to subsequently compute frequencies indicating how often a
     # particular observation was drawn in each set of pseudorandom resampling replicates
-    data$id <- 1:nrow(x = data)
+    data$tmp_id <- 1:nrow(x = data)
 
     # Set up a cluster for parallel processing to speed up resampling and model fitting
     cluster <- parallel::makePSOCKcluster(names = ncpus)
@@ -128,14 +127,14 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
     }
 
     # Export required objects to each node to initialize parallel processing
-    parallel::clusterExport(cl = cluster, varlist = c('data', 'f'), envir = environment())
+    parallel::clusterExport(cl = cluster, varlist = c('data', 'f', 'resample'), envir = environment())
 
     # Set seed for L'Ecuyer's pseudorandom number generator for reproducibility
     parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
 
     # Run 'f' on each node to obtain estimates of model parameters from model fitting in each set of
     # pseudorandom resampling replicates
-    output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = f, data = data, size = size, replace = replace, ...)
+    output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = resample, data = data, size = size, replace = replace, ...)
 
     # Shut down the cluster
     parallel::stopCluster(cl = cluster)

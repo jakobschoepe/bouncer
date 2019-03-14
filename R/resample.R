@@ -23,7 +23,7 @@ resample <- function(i, data, size, replace, seed) {
   # Resample from the original sample.
   data_tmp <- data[sample(x = 1:nrow(x = data), size = size, replace = replace), ]
   
-  # Fit the user-defined model. 
+  # Fit the user-defined model to the resampled data. 
   fit_tmp <- f(data = data_tmp)
   
   return(list(seed = seed_tmp, oir = data_tmp$id, betaij = fit_tmp))

@@ -35,7 +35,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
     stop("\"f\" must contain the following argument: \"data\"")
   }
 
-  else if (!is.data.frame(x = data) | !is.data.table(x = data)) {
+  else if (!is.data.frame(x = data) & !is.data.table(x = data)) {
     stop("\"data\" must be a data frame or data table")
   }
 

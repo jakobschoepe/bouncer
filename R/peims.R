@@ -8,7 +8,6 @@
 #' @param seed An integer giving the random seed to initialize Pierre L'Ecuyer's multiple streams of pseudo-random numbers.
 #' @param ncpus A positive integer giving the number of cores to be used during processing (\code{ncpus = 1} for serial processing is not recommended).
 #' @param pkgs An optional character vector giving the names of the required packages.
-#' @param ... Optional arguments.
 #' @details A user-defined function passed to \code{f} should contain the following arguments: \code{i}, \code{data}, \code{size}, \code{replace}. The first assignment and the \code{return} expression of this function should remain unchanged.
 #' @return An object of S4 class \code{"peims"} containing the following slots:
 #' \item{oir}{A matrix containing the number of draws per observation in each resampling replicate.}
@@ -25,7 +24,7 @@
 #' fit <- peims(f = f, data = mtcars, size = 32L, replace = TRUE, k = 10L, seed = 123L, ncpus = 2L)
 #' @export
 
-peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
+peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
   # Check passed arguments to smoothly run subsequent computations
   if (!is.function(x = f)) {
     stop("\"f\" must be a function")
@@ -110,7 +109,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
   else if (ncpus > parallel::detectCores()) {
     stop("\"ncpus\" exceeds the number of detected cores")
   }
-
+  
   else {
     # Add an identifier to each observation to subsequently compute frequencies indicating how often a
     # particular observation was drawn in each set of pseudorandom resampling replicates
@@ -125,6 +124,10 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
         parallel::stopCluster(cl = cluster)
         stop("\"pkgs\" must be a character vector")
       }
+      else if (!(pkgs %in% rownames(x = installed.packages()))) {
+        parallel::stopCluster(cl = cluster)
+        stop("required package(s) not found in library")
+      }
       else {
         parallel::clusterCall(cl = cluster, fun = lapply, X = pkgs, FUN = require, character.only = TRUE)
       }
@@ -133,12 +136,12 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
     # Export required objects to each node to initialize parallel processing
     parallel::clusterExport(cl = cluster, varlist = c('data', 'f', 'resample'), envir = environment())
 
-    # Set seed for L'Ecuyer's pseudorandom number generator for reproducibility
+    # Set seed for L'Ecuyer's pseudo-random number generator for reproducibility
     parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
 
     # Run 'f' on each node to obtain estimates of model parameters from model fitting in each set of
     # pseudorandom resampling replicates
-    output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = resample, data = data, size = size, replace = replace, ...)
+    output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = resample, data = data, size = size, replace = replace)
 
     # Shut down the cluster
     parallel::stopCluster(cl = cluster)

@@ -34,6 +34,10 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
   else if (!is.element(el = "data", set = names(x = formals(fun = f)))) {
     stop("\"f\" must contain the following argument: \"data\"")
   }
+  
+  else if (length(x = names(x = formals(fun = f))) > 1) {
+    stop("\"f\" should contain only one argument")
+  }
 
   else if (!is.data.frame(x = data) & !data.table::is.data.table(x = data)) {
     stop("\"data\" must be a data frame or data table")
@@ -42,17 +46,17 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
   else if (!is.integer(x = size)) {
     stop("\"size\" must be a positive integer")
   }
-
-  else if (size < 1) {
-    stop("\"size\" must be a positive integer")
-  }
-
+  
   else if (length(x = size) > 1) {
     stop("single positive integer for \"size\" expected")
   }
+  
+  else if (size < 1L) {
+    stop("\"size\" must be a positive integer")
+  }
 
   else if (size > nrow(x = data)) {
-    stop("\"size\" exceeds available number of observations")
+    stop("\"size\" exceeds the number of available observations in \"data\"")
   }
 
   else if (!is.logical(x = replace)) {
@@ -64,15 +68,15 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
   }
 
   else if (!is.integer(x = k)) {
-    stop("\"k\" must be a positive integer equal to or greater 2")
+    stop("\"k\" must be a positive integer equal to or greater than 2")
   }
-
-  else if (k < 2) {
-    stop("\"k\" must be a positive integer equal to or greater 2")
-  }
-
+  
   else if (length(x = k) > 1) {
     stop("single positive integer for \"k\" expected")
+  }
+  
+  else if (k < 2L) {
+    stop("\"k\" must be a positive integer equal to or greater than 2")
   }
 
   else if (isTRUE(x = replace) & k > choose(n = nrow(x = data) + size - 1, k = size)) {
@@ -95,16 +99,16 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs, ...) {
     stop("\"ncpus\" must be a positive integer")
   }
 
-  else if (ncpus < 1) {
-    stop("\"ncpus\" must be a positive integer")
-  }
-
   else if (length(x = ncpus) > 1) {
     stop("single positive integer for \"ncpus\" expected")
   }
+  
+  else if (ncpus < 1L) {
+    stop("\"ncpus\" must be a positive integer")
+  }
 
   else if (ncpus > parallel::detectCores()) {
-    stop("number of cores exceeds number of detected cores")
+    stop("\"ncpus\" exceeds the number of detected cores")
   }
 
   else {

@@ -5,7 +5,7 @@ Version: 0.3.0
 Date: 2019-03-19
 Author: Jakob Schöpe
 Maintainer: Jakob Schöpe <schoepe@med-imbei.uni-saarland.de>
-Description: An efficient and flexible utility routine for assessing instability in model selection with subsequent parameter estimation using resampling methods and bagging methodology.
+Description: A flexible and efficient utility routine for assessing instability in model selection with subsequent parameter estimation using resampling methods and bagging methodology.
 License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true

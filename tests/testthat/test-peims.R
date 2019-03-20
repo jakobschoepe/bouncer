@@ -1,5 +1,16 @@
 context(desc = "Resampling and parameter estimation")
 
+param <- c(0.0,
+           0.3, 0.1,
+           0.0, 0.2, 0.5)
+margins <- c("norm", "binom", "binom", "norm")
+paramMargins <- list(list(mean = 0, sd = 1), list(size = 1, prob = 0.3), list(size = 1, prob = .1), list(mean = 20, sd = 4))
+betas <- c(-3.10, 0.00, -0.45, 0.22, -0.16)
+myData <- dg(param = param, dim = 4L, dispstr = "un", margins = margins, paramMargins = paramMargins, n = 100, f = ~ V1 + V2 + V3+ V4, betas = betas, link = "logit")
+f <- function(data) {
+          
+
+
 test_that(desc = "peims throws an error if arguments are misspecified", 
           code = {expect_error(object = peims::peims(f = NULL, data = mtcars, size = 32L, replace = TRUE, k = 100L, seed = 123L, ncpus = 2L),
                                regexp = "\"f\" must be a function")

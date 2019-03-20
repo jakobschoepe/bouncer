@@ -34,7 +34,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"f\" must contain the following argument: \"data\"")
   }
   
-  else if (length(x = names(x = formals(fun = f))) > 1) {
+  else if (length(x = names(x = formals(fun = f))) != 1L) {
     stop("\"f\" should contain only one argument")
   }
 
@@ -46,7 +46,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"size\" must be a positive integer")
   }
   
-  else if (length(x = size) > 1) {
+  else if (length(x = size) != 1L) {
     stop("single positive integer for \"size\" expected")
   }
   
@@ -62,7 +62,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"replace\" must be a logical value")
   }
 
-  else if (length(x = replace) > 1) {
+  else if (length(x = replace) != 1L) {
     stop("single logical value for \"replace\" expected")
   }
 
@@ -70,7 +70,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"k\" must be a positive integer equal to or greater than 2")
   }
   
-  else if (length(x = k) > 1) {
+  else if (length(x = k) != 1L) {
     stop("single positive integer for \"k\" expected")
   }
   
@@ -90,7 +90,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"seed\" must be an integer")
   }
 
-  else if (length(x = seed) > 1) {
+  else if (length(x = seed) != 1L) {
     stop("single integer for \"seed\" expected")
   }
 
@@ -98,7 +98,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"ncpus\" must be a positive integer")
   }
 
-  else if (length(x = ncpus) > 1) {
+  else if (length(x = ncpus) != 1L) {
     stop("single positive integer for \"ncpus\" expected")
   }
   

@@ -40,8 +40,15 @@ test_that(desc = "peims throws an error if arguments are misspecified",
           }
 )
   
-test_that(desc = "parallelized pseudo-random resampling works as expected", 
+test_that(desc = "peims resamples as expected", 
           code = {expect_identical(object = peims::peims(f = f, data = mtcars, size = 32L, replace = TRUE, k = 100L, seed = 123L, ncpus = parallel::detectCores()), 
+                                   expected = {
+                                   }
+          }
+)
+
+test_that(desc = "peims returns estimated model parameters accurately",
+          code = {expect_identical(object = peims::peims(f = f, data = mtcars, size = 32L, replace = TRUE, k = 100L, seed = 123L, ncpus = parallel::detectCores()),
                                    expected = {
                                    }
           }

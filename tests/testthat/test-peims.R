@@ -53,7 +53,21 @@ test_that(desc = "peims throws an error if arguments are misspecified",
                                regexp = "\"ncpus\" exceeds the number of detected cores")
           }
 )
-  
+
+RNGkind(kind = "L'Ecuyer-CMRG")
+set.seed(123)
+
+myList <- lapply(X = 1:100, function(i) {
+  seed <- .Random.seed
+  tmp1 <- sample(1:100, size = 100, replace = TRUE)
+  .Random.seed <<- nextRNGStream(seed = seed)
+  return(tmp1)
+})
+
+myMatrix <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:100, function(i) {as.list(x = table(myList[[i]]))}), fill = TRUE))
+myMatrix <- myMatrix[, order(as.integer(x = colnames(x = myMatrix)))]
+myMatrix[is.na(x = myMatrix)] <- 0
+
 test_that(desc = "peims resamples as expected", 
           code = {ncpus <- as.integer(x = parallel::detectCores())
                   expect_identical(object = peims(f = f, data = myData, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = ncpus), 

@@ -21,12 +21,10 @@ resample <- function(i, data, size, replace, seed) {
   seed <- .Random.seed
   
   # Resample from the original sample.
-  data_tmp <- data[sample(x = 1:nrow(x = data), size = size, replace = replace), ]
+  oir <- sample(x = 1:nrow(x = data), size = size, replace = replace)
+  data_tmp <- data[oir, ]
 
-  oir <- data_tmp$tmp_id
-  data_tmp$tmp_id <- NULL
-  
-  # Fit the user-defined model to the resampled data. 
+  # Fit the user-defined model to the resampled data set. 
   betaij <- f(data = data_tmp)
   
   return(list(seed = seed, oir = oir, betaij = betaij))

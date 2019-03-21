@@ -111,10 +111,6 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
   }
   
   else {
-    # Add an identifier to each observation to subsequently compute frequencies indicating how often a
-    # particular observation was drawn in each set of pseudorandom resampling replicates
-    data$tmp_id <- 1:nrow(x = data)
-
     # Set up a cluster for parallel processing to speed up resampling and model fitting
     cluster <- parallel::makePSOCKcluster(names = ncpus)
 

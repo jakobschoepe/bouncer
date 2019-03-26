@@ -10,9 +10,11 @@
 #' @param pkgs An optional character vector giving the names of the required packages.
 #' @details The user-defined function passed to \code{f} should return a real vector containing the estimated model parameters and should have the following structure: \code{function(data) {Insert your code here.}}.
 #' @return An object of S4 class \code{"peims"} containing the following slots:
-#' \item{oir}{A matrix containing the frequencies of draws per observation in each replicate.}
-#' \item{betaij}{A matrix containing the estimated model parameters of each replicate.}
+#' \item{seedi}{A matrix containing the state of L'Ecuyer's pseudo-random number generator from each replication.}
+#' \item{oir}{A matrix containing the frequency of draws per observation from each replication.}
+#' \item{betaij}{A matrix containing the estimated model parameters from each replication.}
 #' @references Work in progress.
+#' @author Jakob Schöpe
 #' @examples
 #' f <- function(data) {
 #' null <- glm(formula = y ~ 1, family = binomial, data = data)
@@ -145,7 +147,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     # facilitate efficient reproducibility. 
     seedi <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["seed"]])})))
 
-    # Create a matrix that contains the frequencies of draws per observation from each replication to subsequently compute 
+    # Create a matrix that contains the frequency of draws per observation from each replication to subsequently compute 
     # bootstrap covariances for confidence interval estimation (Note: NAs indicate zero frequency, but are transformed below!)
     oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(output[[i]][["oir"]]))}), fill = TRUE))
     oir <- oir[, order(as.integer(x = colnames(x = oir)))]
@@ -157,6 +159,5 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     betaij <- betaij[, order(colnames(x = betaij))]
 
     return(new(Class = "peims", seedi = seedi, oir = oir, betaij = betaij))
-
   }
 }

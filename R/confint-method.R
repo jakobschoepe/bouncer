@@ -6,16 +6,16 @@
 #' @details \code{confint} provides four methods to estimate confidence intervals for smoothed model parameters: bias-corrected smoothed interval (\code{"bcsi"}; default), percentile interval (\code{"pcti"}), smoothed interval (\code{"smoi"}), standard interval (\code{"stdi"}).
 #' @return A matrix with columns giving the lower and upper confidence limits for each smoothed model parameter.
 #' @references Efron B (2014) Estimation and accuracy after model selection. J Am Stat Assoc 109:991--1007
+#' @author Jakob Schöpe
 #' @examples
-#' f <- function(i, data, size, replace) {
-#' data <- data[sample(x = 1:nrow(x = data), size = size, replace = replace),]
-#' null <- glm(formula = mpg ~ 1, family = gaussian, data = data)
-#' full <- glm(formula = mpg ~ . -id, family = gaussian, data = data)
+#' f <- function(data) {
+#' null <- glm(formula = y ~ 1, family = binomial, data = data)
+#' full <- glm(formula = y ~ ., family = binomial, data = data)
 #' fit <- coef(step(object = null, scope = list(upper = full), direction = "both", trace = 0, k = 2))
-#' return(list(oir = data$id, betaij = fit))
+#' return(fit)
 #' }
 #'
-#' fit <- peims(f = f, data = mtcars, size = 32L, replace = TRUE, k = 10L, seed = 123L, ncpus = 2L)
+#' fit <- peims(f = f, data = data, size = 100L, replace = TRUE, k = 5000L, seed = 123L, ncpus = 2L)
 #'
 #' confint(fit)
 #' @export
@@ -23,7 +23,26 @@
 setMethod(f = "confint",
           signature = "peims",
           definition = function(object, level = .95, method = "bcsi") {
-
+            if (!is.numeric(x = level)) {
+              stop("\"level\" must be a numeric value")
+            }
+                    
+            else if (length(x = level) != 1L) {       
+              stop("single numeric value for \"level\" expected")          
+            }
+                    
+            else if (!is.character(x = method)) {
+              stop("\"method\" must be a character string")     
+            }
+                    
+            else if (length(x = method) != 1L) {
+              stop("single character string for \"method\" expected")
+            }
+            
+            else if (!(method %in% c("bcsi", "pcti", "smoi", "stdi"))) {
+              stop("\"method\" is misspecified. Currently available confidence interval estimation procedures are: \"bcsi\", \"pcti\", \"smoi\" and \"stdi\"")
+            }
+                    
             betaij <- object@betaij
             betaj <- colMeans(x = betaij, na.rm =TRUE)
             oir <- object@oir

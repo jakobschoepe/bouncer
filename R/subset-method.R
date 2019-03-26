@@ -7,15 +7,14 @@
 #' \item{betaij}{A matrix containing the estimated model parameters of each resampling replicate with the model of interest.}
 #' @references Work in progress.
 #' @examples
-#' f <- function(i, data, size, replace) {
-#' data <- data[sample(x = 1:nrow(x = data), size = size, replace = replace),]
-#' null <- glm(formula = mpg ~ 1, family = gaussian, data = data)
-#' full <- glm(formula = mpg ~ . -id, family = gaussian, data = data)
+#' f <- function(data) {
+#' null <- glm(formula = y ~ 1, family = binomial, data = data)
+#' full <- glm(formula = y ~ ., family = binomial, data = data)
 #' fit <- coef(step(object = null, scope = list(upper = full), direction = "both", trace = 0, k = 2))
-#' return(list(oir = data$id, betaij = fit))
+#' return(fit)
 #' }
 #'
-#' fit <- peims(f = f, data = mtcars, size = 32L, replace = TRUE, k = 10L, seed = 123L, ncpus = 2L)
+#' fit <- peims(f = f, data = data, size = 100L, replace = TRUE, k = 5000L, seed = 123L, ncpus = 2L)
 #'
 #' subset(fit)
 #' @export

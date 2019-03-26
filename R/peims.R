@@ -1,27 +1,27 @@
 #' @title Approximating sampling distributions of model parameters from model selection procedures
 #' @description \code{peims} approximates sampling distributions of model parameters from model selection procedures using resampling methods.
 #' @param f A user-defined function (see Details).
-#' @param data A data frame containing the variables in the model.
+#' @param data A data frame or data table containing the variables in the model.
 #' @param size A positive integer giving the number of observations to draw from the original sample.
 #' @param replace A logical constant indicating if resampling should be with replacement.
 #' @param k A positive integer giving the number of resampling replicates.
 #' @param seed An integer giving the random seed to initialize Pierre L'Ecuyer's multiple streams of pseudo-random numbers.
 #' @param ncpus A positive integer giving the number of cores to be used during processing (\code{ncpus = 1} for serial processing is not recommended).
 #' @param pkgs An optional character vector giving the names of the required packages.
-#' @details A user-defined function passed to \code{f} should contain the following arguments: \code{i}, \code{data}, \code{size}, \code{replace}. The first assignment and the \code{return} expression of this function should remain unchanged.
+#' @details The user-defined function passed to \code{f} should return a real vector containing the estimated model parameters and should have the following structure: \code{function(data) {Insert your code here.}}.
 #' @return An object of S4 class \code{"peims"} containing the following slots:
-#' \item{oir}{A matrix containing the number of draws per observation in each resampling replicate.}
-#' \item{betaij}{A matrix containing the estimated model parameters of each resampling replicate.}
+#' \item{oir}{A matrix containing the frequencies of draws per observation in each replicate.}
+#' \item{betaij}{A matrix containing the estimated model parameters of each replicate.}
 #' @references Work in progress.
 #' @examples
 #' f <- function(data) {
-#' null <- glm(formula = mpg ~ 1, family = gaussian, data = data)
-#' full <- glm(formula = mpg ~ ., family = gaussian, data = data)
+#' null <- glm(formula = y ~ 1, family = binomial, data = data)
+#' full <- glm(formula = y ~ ., family = binomial, data = data)
 #' fit <- coef(step(object = null, scope = list(upper = full), direction = "both", trace = 0, k = 2))
 #' return(fit)
 #' }
 #'
-#' fit <- peims(f = f, data = mtcars, size = 32L, replace = TRUE, k = 10L, seed = 123L, ncpus = 2L)
+#' fit <- peims(f = f, data = data, size = 100L, replace = TRUE, k = 5000L, seed = 123L, ncpus = 2L)
 #' @export
 
 peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
@@ -135,33 +135,28 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     # Set seed for L'Ecuyer's pseudo-random number generator for reproducibility
     parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
 
-    # Run 'f' on each node to obtain estimates of model parameters from model fitting in each set of
-    # pseudorandom resampling replicates
+    # Run 'resample' on each initialized node 
     output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = resample, data = data, size = size, replace = replace)
 
     # Shut down the cluster
     parallel::stopCluster(cl = cluster)
+    
+    # Create a matrix that contains the state of L'Ecuyer's pseudo-random number generator from each replication to 
+    # facilitate efficient reproducibility. 
+    seedi <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["seed"]])})))
 
-    # Create a matrix which contains frequencies indicating how often a particular observation was drawn in
-    # each set of pseudorandom resampling replicates to subsequently compute bootstrap covariances for
-    # confidence interval estimation (Note: NAs indicate zero frequency, but are transformed below!)
+    # Create a matrix that contains the frequencies of draws per observation from each replication to subsequently compute 
+    # bootstrap covariances for confidence interval estimation (Note: NAs indicate zero frequency, but are transformed below!)
     oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(output[[i]][["oir"]]))}), fill = TRUE))
-
-    # Arrange columns of 'oir' for reasons of clarity
     oir <- oir[, order(as.integer(x = colnames(x = oir)))]
-
-    # Replace NAs in 'oir' with zeros to indicate correct frequencies (see above)
     oir[is.na(x = oir)] <- 0
 
-    # Create a matrix which contains estimates of model parameters from model fitting in each set of pseudorandom
-    # resampling replicates to subsequently assess instability in model selection and to compute smoothed estimates
-    # through bagging with their corresponding confidence intervals
+    # Create a matrix that contains the estimated model parameters from each replication to subsequently assess instability 
+    # in model selection and to compute smoothed estimates through bagging with their corresponding confidence intervals
     betaij <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["betaij"]])}), fill = TRUE))
-
-    # Sort columns of 'betaij' for reasons of clarity
     betaij <- betaij[, order(colnames(x = betaij))]
 
-    return(new(Class = "peims", oir = oir, betaij = betaij))
+    return(new(Class = "peims", seedi = seedi, oir = oir, betaij = betaij))
 
   }
 }

@@ -40,7 +40,7 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"f\" should contain only one argument")
   }
 
-  else if (!is.data.frame(x = data) & !data.table::is.data.table(x = data)) {
+  else if (!is.data.frame(x = data) && !data.table::is.data.table(x = data)) {
     stop("\"data\" must be a data frame or data table")
   }
 
@@ -80,11 +80,11 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"k\" must be a positive integer equal to or greater than 2")
   }
 
-  else if (isTRUE(x = replace) & k > choose(n = nrow(x = data) + size - 1, k = size)) {
+  else if (isTRUE(x = replace) && k > choose(n = nrow(x = data) + size - 1, k = size)) {
     stop("\"size\" is to large considering ", k, " resampling replicates with replacement")
   }
 
-  else if (!isTRUE(x = replace) & k > choose(n = nrow(x = data), k = size)) {
+  else if (!isTRUE(x = replace) && k > choose(n = nrow(x = data), k = size)) {
     stop("\"size\" is to large considering ", k, " resampling replicates without replacement")
   }
 

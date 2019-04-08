@@ -27,7 +27,7 @@
 #' @export
 
 peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
-  # Check passed arguments to smoothly run subsequent computations
+  # Check passed arguments to smoothly run subsequent commands
   if (!is.function(x = f)) {
     stop("\"f\" must be a function")
   }

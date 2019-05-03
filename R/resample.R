@@ -28,6 +28,10 @@ resample <- function(i, data, size, replace, seed) {
     }
   }
   
+  else if (!exists(x = ".Random.seed")) {
+    stop("state for the pseudo-random number generator has not been set")
+  }
+  
   else {  
     # Store the current state of the pseudo-random number generator for reproducability.
     seed <- .Random.seed

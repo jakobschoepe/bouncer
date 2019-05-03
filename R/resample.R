@@ -22,20 +22,23 @@ resample <- function(i, data, size, replace, seed) {
       RNGkind(kind = "L'Ecuyer-CMRG")
       .Random.seed <<- seed
     }
+    
     else {
       stop("\"seed\" has been misspecified")
     }
   }
   
-  # Store the current state of the pseudo-random number generator for reproducability.
-  seed <- .Random.seed
+  else {  
+    # Store the current state of the pseudo-random number generator for reproducability.
+    seed <- .Random.seed
   
-  # Resample from the original sample.
-  oir <- sample(x = 1:nrow(x = data), size = size, replace = replace)
-  data_tmp <- data[oir, ]
+    # Resample from the original sample.
+    oir <- sample(x = 1:nrow(x = data), size = size, replace = replace)
+    data_tmp <- data[oir, ]
 
-  # Fit the user-defined model to the resampled data set. 
-  betaij <- f(data = data_tmp)
+    # Fit the user-defined model to the resampled data set. 
+    betaij <- f(data = data_tmp)
   
-  return(list(seed = seed, oir = oir, betaij = betaij))
+    return(list(seed = seed, oir = oir, betaij = betaij))
+  }
 }

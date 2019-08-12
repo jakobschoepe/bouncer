@@ -23,7 +23,7 @@
 \references{
 Schöpe J & Wagenpfeil S (2018)
 }
-\author{Jakob Schöpe (\email{jas@med-imbei.uni-saarland.de})}
+\author{Jakob Schöpe (\email{jakob.schoepe@uni-saarland.de})}
 
 \examples{
 f <- function(i, data, size, replace) {

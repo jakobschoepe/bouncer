@@ -21,7 +21,7 @@ mpeims <- function(X, data, ...) {
   }
   
   else {
-    # Iterate dg() to
+    # Iterate peims()
     tmp <- lapply(X = 1:X, FUN = function(i) {
       peims(data = data[[i]], ...)
     })

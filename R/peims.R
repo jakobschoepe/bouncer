@@ -1,7 +1,7 @@
 #' @title Approximating sampling distributions of model parameters from model selection procedures
 #' @description \code{peims} approximates sampling distributions of model parameters from model selection procedures using resampling methods.
 #' @param f A user-defined function (see Details).
-#' @param data A data frame or data table containing the variables in the model.
+#' @param data A data frame containing the variables in the model.
 #' @param size A positive integer giving the number of observations to draw from the original sample.
 #' @param replace A logical constant indicating if resampling should be with replacement.
 #' @param k A positive integer giving the number of resampling replicates.
@@ -40,8 +40,8 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"f\" should contain only one argument")
   }
 
-  else if (!is.data.frame(x = data) && !data.table::is.data.table(x = data)) {
-    stop("\"data\" must be a data frame or data table")
+  else if (!is.data.frame(x = data)) {
+    stop("\"data\" must be a data frame")
   }
 
   else if (!is.integer(x = size)) {

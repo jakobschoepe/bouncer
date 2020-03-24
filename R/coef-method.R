@@ -1,8 +1,14 @@
 #' @title Estimating smoothed model parameters
-#' @description For objects of class \code{"peims"}, \code{coef} estimates smoothed model parameters from approximated sampling distributions using bagging methodology.
+#' @description For objects of class \code{"peims"}, \code{coef()} estimates smoothed model parameters from approximated sampling distributions using bagging methodology.
 #' @param object An object of class \code{"peims"}.
-#' @return A real vector giving estimated smoothed model parameters.
-#' @references Work in progress.
+#' @details Smoothed estimates for model parameters are derived from 
+#' \begin{equation*}
+#' \tilde\beta^{*} = \frac{1}{k}\displaystyle\sum_{i=1}^{k} \hat\beta_{i}^{*}
+#' \end{equation*}
+#' where $k$ is the number of resampling replicates, and $\hat\beta_{i}^{*}$ is the estimate from the $i^{th}$ resampling replicate.
+#' @return A numeric vector giving smoothed model parameter estimates.
+#' @references Breiman L (1996) Bagging predictors. Mach Learn 24:123-140
+#' @aliases coef,peims-method
 #' @author Jakob Schöpe
 #' @examples
 #' f <- function(data) {

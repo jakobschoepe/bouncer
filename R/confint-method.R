@@ -1,11 +1,29 @@
-#' @title Estimating confidence intervals for smoothed model parameters
-#' @description For objects of class \code{"peims"}, \code{confint} estimates confidence intervals for smoothed model parameters from approximated sampling distributions.
+#' @title Estimating confidence intervals for smoothed model parameter estimates
+#' @description For objects of class \code{"peims"}, \code{confint()} estimates confidence intervals for smoothed model parameter estimates from approximated sampling distributions.
 #' @param object An object of class \code{"peims"}.
 #' @param level A numeric value giving the level of confidence.
 #' @param method A string indicating the method of estimation (see Details).
-#' @details \code{confint} provides four methods to estimate confidence intervals for smoothed model parameters: bias-corrected smoothed interval (\code{"bcsi"}; default), percentile interval (\code{"pcti"}), smoothed interval (\code{"smoi"}), standard interval (\code{"stdi"}).
-#' @return A matrix with columns giving the lower and upper confidence limits for each smoothed model parameter.
+#' @details \code{confint()} provides four methods to estimate confidence intervals for smoothed model parameter estimates: bias-corrected smoothed interval ("bcsi"; default), percentile interval ("pcti"), smoothed interval ("smoi"), standard interval ("stdi").
+#'
+#' Standard interval:
+#' \begin{equation*}
+#' \tilde\beta_{j} \pm z_{(1-\frac{\alpha}{2})} \hat\sigma_{j}^{*}
+#' \end{equation*}
+#' where $\tilde\beta_{j}$ indicates the $j^{th}$ estimated model parameter from, and 
+#' \begin{equation*}
+#' \hat\sigma_{j}^{*} = \sqrt{\frac{1}{k-1}\displaystyle\sum_{i=1}^{k}(\hat\beta_{ij}^{*}-\tilde\beta_{j}^{*})^2}.
+#' \end{equation*}
+#' where $\hat\beta_{ij}^{*}$ indicates the $j^{th}$ estimated model parameter from the $i^{th}$ resampling replicate, and $\tilde\beta_{j}^{*}$ is the expected value for the $j^{th}$ model parameter from the approximated sampling distribution obtained from $k$ resampling replicates.
+#'
+#' Percentile interval:
+#' \begin{equation*}
+#' \hat\beta_{j}^{*(\frac{\alpha}{2})};~\hat\beta_{j}^{*(1-\frac{\alpha}{2})}
+#' \end{equation*}
+#' where $\hat\beta_{j}^{*(\frac{\alpha}{2})}$ and $\hat\beta_{j}^{*(1-\frac{\alpha}{2})}$ indicate respectively the $\frac{\alpha}{2}^{th}$ and $1-\frac{\alpha}{2}^{th}$ percentiles for the $j^{th}$ model parameter from the approximated sampling distribution obtained from $k$ resampling replicates.
+#'
+#' @return A numeric matrix with columns giving the lower and upper confidence limits for each smoothed model parameter estimates.
 #' @references Efron B (2014) Estimation and accuracy after model selection. J Am Stat Assoc 109:991--1007
+#' @aliases confint,peims-method
 #' @author Jakob Schöpe
 #' @examples
 #' f <- function(data) {

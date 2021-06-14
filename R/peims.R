@@ -138,24 +138,24 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
 
     # Run 'resample' on each initialized node 
-    output <- pbapply::pblapply(cl = cluster, X = 1:k, FUN = resample, data = data, size = size, replace = replace)
+    output <- pbapply::pblapply(cl = cluster, X = seq_len(k), FUN = resample, data = data, size = size, replace = replace)
 
     # Shut down the cluster
     parallel::stopCluster(cl = cluster)
     
     # Create a matrix that contains the state of L'Ecuyer's pseudo-random number generator from each replication to 
     # facilitate efficient reproducibility. 
-    seedi <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["seed"]])})))
+    seedi <- as.matrix(x = data.table::rbindlist(l = lapply(X = seq_len(k), function(i) {as.list(x = output[[i]][["seed"]])})))
 
     # Create a matrix that contains the frequency of draws per observation from each replication to subsequently compute 
     # bootstrap covariances for confidence interval estimation (Note: NAs indicate zero frequency, but are transformed below!)
-    oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = table(output[[i]][["oir"]]))}), fill = TRUE))
+    oir <- as.matrix(x = data.table::rbindlist(l = lapply(X = seq_len(k), function(i) {as.list(x = table(output[[i]][["oir"]]))}), fill = TRUE))
     oir <- oir[, order(as.integer(x = colnames(x = oir)))]
     oir[is.na(x = oir)] <- 0
 
     # Create a matrix that contains the estimated model parameters from each replication to subsequently assess instability 
     # in model selection and to compute smoothed estimates through bagging with their corresponding confidence intervals
-    betaij <- as.matrix(x = data.table::rbindlist(l = lapply(X = 1:k, function(i) {as.list(x = output[[i]][["betaij"]])}), fill = TRUE))
+    betaij <- as.matrix(x = data.table::rbindlist(l = lapply(X = seq_len(k), function(i) {as.list(x = output[[i]][["betaij"]])}), fill = TRUE))
     betaij <- betaij[, order(colnames(x = betaij))]
 
     return(new(Class = "peims", seedi = seedi, oir = oir, betaij = betaij))

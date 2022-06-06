@@ -1,5 +1,5 @@
 #' @title Approximating sampling distributions of model parameters from model selection procedures
-#' @description \code{peims} approximates sampling distributions of model parameters from model selection procedures using resampling methods.
+#' @description \code{bouncer} approximates sampling distributions of model parameters from model selection procedures using resampling methods.
 #' @param f A user-defined function (see Details).
 #' @param data A data frame containing the variables in the model.
 #' @param size A positive integer giving the number of observations to draw from the original sample.
@@ -9,24 +9,14 @@
 #' @param ncpus A positive integer giving the number of cores to be used during processing (\code{ncpus = 1} for serial processing is not recommended).
 #' @param pkgs An optional character vector giving the names of the required packages.
 #' @details The user-defined function passed to \code{f} should return a real vector containing the estimated model parameters and should have the following structure: \code{function(data) {Insert your code here.}}.
-#' @return An object of S4 class \code{"peims"} containing the following slots:
+#' @return An object of S4 class \code{"bouncer"} containing the following slots:
 #' \item{seedi}{A matrix containing the state of L'Ecuyer's pseudo-random number generator from each replication.}
 #' \item{oir}{A matrix containing the frequency of draws per observation from each replication.}
 #' \item{betaij}{A matrix containing the estimated model parameters from each replication.}
-#' @references Work in progress.
 #' @author Jakob Schöpe
-#' @examples
-#' f <- function(data) {
-#' null <- glm(formula = y ~ 1, family = binomial, data = data)
-#' full <- glm(formula = y ~ ., family = binomial, data = data)
-#' fit <- coef(step(object = null, scope = list(upper = full), direction = "both", trace = 0, k = 2))
-#' return(fit)
-#' }
-#'
-#' fit <- peims(f = f, data = data, size = 100L, replace = TRUE, k = 5000L, seed = 123L, ncpus = 2L)
 #' @export
 
-peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
+bouncer <- function(f, data, size, replace, k, seed, ncpus, method, pkgs) {
   # Check passed arguments to smoothly run subsequent commands
   if (!is.function(x = f)) {
     stop("\"f\" must be a function")
@@ -112,6 +102,18 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     stop("\"ncpus\" exceeds the number of detected cores")
   }
   
+  else if (!is.character(x = method)) {
+    stop("\"method\" must be a character string")
+  }
+  
+  else if (length(x = method) != 1L) {
+    stop("single character string for \"method\" expected")
+  }
+  
+  else if (!(method %in% c("simple", "block"))) {
+    stop("\"method\" is misspecified")
+  }
+  
   else {
     # Set up a cluster for parallel processing to speed up resampling and model fitting
     cluster <- parallel::makePSOCKcluster(names = ncpus)
@@ -158,6 +160,6 @@ peims <- function(f, data, size, replace, k, seed, ncpus, pkgs) {
     betaij <- as.matrix(x = data.table::rbindlist(l = lapply(X = seq_len(k), function(i) {as.list(x = output[[i]][["betaij"]])}), fill = TRUE))
     betaij <- betaij[, order(colnames(x = betaij))]
 
-    return(new(Class = "peims", seedi = seedi, oir = oir, betaij = betaij))
+    return(new(Class = "bouncer", seedi = seedi, oir = oir, betaij = betaij))
   }
 }

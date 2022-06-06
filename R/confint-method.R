@@ -1,6 +1,6 @@
 #' @title Estimating confidence intervals for smoothed model parameter estimates
-#' @description For objects of class \code{"peims"}, \code{confint()} estimates confidence intervals for smoothed model parameter estimates from approximated sampling distributions.
-#' @param object An object of class \code{"peims"}.
+#' @description For objects of class \code{"bouncer"}, \code{confint()} estimates confidence intervals for smoothed model parameter estimates from approximated sampling distributions.
+#' @param object An object of class \code{"bouncer"}.
 #' @param level A numeric value giving the level of confidence.
 #' @param method A string indicating the method of estimation (see Details).
 #' @details \code{confint()} provides four methods to estimate confidence intervals for smoothed model parameter estimates: bias-corrected smoothed interval ("bcsi"; default), percentile interval ("pcti"), smoothed interval ("smoi"), standard interval ("stdi").
@@ -25,21 +25,10 @@
 #' @references Efron B (2014) Estimation and accuracy after model selection. J Am Stat Assoc 109:991--1007
 #' @aliases confint,peims-method
 #' @author Jakob Schöpe
-#' @examples
-#' f <- function(data) {
-#' null <- glm(formula = y ~ 1, family = binomial, data = data)
-#' full <- glm(formula = y ~ ., family = binomial, data = data)
-#' fit <- coef(step(object = null, scope = list(upper = full), direction = "both", trace = 0, k = 2))
-#' return(fit)
-#' }
-#'
-#' fit <- peims(f = f, data = data, size = 100L, replace = TRUE, k = 5000L, seed = 123L, ncpus = 2L)
-#'
-#' confint(fit)
 #' @export
 
 setMethod(f = "confint",
-          signature = "peims",
+          signature = "bouncer",
           definition = function(object, level = .95, method = "bcsi") {
             if (!is.numeric(x = level)) {
               stop("\"level\" must be a numeric value")

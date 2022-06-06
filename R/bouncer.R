@@ -140,7 +140,7 @@ bouncer <- function(f, data, size, replace, k, seed, ncpus, method, pkgs) {
     parallel::clusterSetRNGStream(cl = cluster, iseed = seed)
 
     # Run 'resample' on each initialized node 
-    output <- pbapply::pblapply(cl = cluster, X = seq_len(k), FUN = resample, data = data, size = size, replace = replace)
+    output <- pbapply::pblapply(cl = cluster, X = seq_len(k), FUN = resample, data = data, size = size, replace = replace, method = method)
 
     # Shut down the cluster
     parallel::stopCluster(cl = cluster)

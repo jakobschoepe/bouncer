@@ -1,18 +1,20 @@
+set.seed(12345)
+X1 <- rnorm(100)
+X2 <- rbinom(100, 1, 0.3)
+X3 <- rnorm(100)
+X4 <- rbinom(100, 1, 0.5)
+b <- model.matrix(~ X1 + X2 + X3 + X4) %*% c(-3.10, 0.00, -0.45, 0.22, -0.16)
+Y <- rbinom(100, 1, 1 / (1 + exp(-b)))
+data <- data.frame(X1, X2, X3, X4, Y)
+f <- function(data) {
+  null <- glm(Y ~ 1, family = binomial, data = data)
+  full <- glm(Y ~ ., family = binomial, data = data)
+  coef(step(null, list(upper = full), direction = "both", trace = 0, k = 2))
+  }
+ncpus <- as.integer(x = parallel::detectCores())
+
 testthat::test_that(desc = "bouncer throws an error if arguments are misspecified", 
-                    code = {X1 <- rnorm(100)
-                            X2 <- rbinom(100, 1, 0.3)
-                            X3 <- rnorm(100)
-                            X4 <- rbinom(100, 1, 0.5)
-                            b <- model.matrix(~ X1 + X2 + X3 + X4) %*% c(-3.10, 0.00, -0.45, 0.22, -0.16)
-                            Y <- rbinom(100, 1, 1 / (1 + exp(-b)))
-                            data <- data.frame(X1, X2, X3, X4, Y)
-                            f <- function(data) {
-                              null <- glm(Y ~ 1, family = binomial, data = data)
-                              full <- glm(Y ~ ., family = binomial, data = data)
-                              coef(step(null, list(upper = full), direction = "both", trace = 0, k = 2))
-                              }
-                            ncpus <- as.integer(x = parallel::detectCores())
-                            testthat::expect_error(object = bouncer(f = NULL, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = ncpus, method = "simple"),
+                    code = {testthat::expect_error(object = bouncer(f = NULL, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = ncpus, method = "simple"),
                                                    regexp = "\"f\" must be a function")
                                
                             testthat::expect_error(object = bouncer(f = function(){}, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = ncpus, method = "simple"),
@@ -74,5 +76,30 @@ testthat::test_that(desc = "bouncer throws an error if arguments are misspecifie
                   
                             testthat::expect_error(object = bouncer(f = f, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = ncpus, method = "NULL"),
                                                    regexp = "\"method\" is misspecified")
+          }
+)
+
+RNGkind(kind = "L'Ecuyer-CMRG")
+set.seed(123)
+tmp01 <- lapply(seq_len(2), function(i) {
+  tmp01 <- .Random.seed
+  tmp02 <- lapply(seq_len(50), function(i) {
+    tmp03 <- .Random.seed
+    tmp04 <- sample(seq_len(100), size = 100, replace = TRUE)
+    return(tmp04)
+  })
+  assign(".Random.seed", parallel::nextRNGStream(tmp01), envir = .GlobalEnv)
+  return(tmp02)
+})
+tmp02 <- do.call(c, Map(list, tmp01[[1]], tmp01[[2]]))
+tmp03 <- as.matrix(data.table::rbindlist(lapply(seq_len(100), function(i) {as.list(table(tmp02[[i]]))}), fill = TRUE))
+tmp03 <- tmp03[, order(as.integer(colnames(tmp03)))]
+tmp03[is.na(tmp03)] <- 0
+tmp04 <- bouncer(f = f, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = ncpus, method = "simple")
+tmp05 <- tmp04@oir
+
+testthat::test_that(desc = "bouncer resamples as expected",
+                    code = {testthat::expect_identical(object = tmp05,
+                                                       expected = tmp03)
           }
 )

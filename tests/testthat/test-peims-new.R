@@ -5,7 +5,7 @@ X3 <- rnorm(100)
 X4 <- rbinom(100, 1, 0.5)
 b <- model.matrix(~ X1 + X2 + X3 + X4) %*% c(-3.10, 0.00, -0.45, 0.22, -0.16)
 Y <- rbinom(100, 1, 1 / (1 + exp(-b)))
-data <- data.frame(X1, X2, X3, X4, Y)
+data <- data.frame(X1, X2, X3, X4, Y, id = rep(1:50, times = 2))
 f <- function(data) {
   null <- glm(Y ~ 1, family = binomial, data = data)
   full <- glm(Y ~ ., family = binomial, data = data)
@@ -98,8 +98,30 @@ tmp03[is.na(tmp03)] <- 0
 tmp04 <- bouncer(f = f, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = 2L, method = "simple")
 tmp05 <- tmp04@oir
 
+RNGkind(kind = "L'Ecuyer-CMRG")
+set.seed(456)
+tmp06 <- lapply(seq_len(2), function(i) {
+  tmp01 <- .Random.seed
+  tmp02 <- lapply(seq_len(50), function(i) {
+    tmp03 <- .Random.seed
+    tmp04 <- sample(seq_len(50), size = 50, replace = TRUE)
+    return(tmp04)
+  })
+  assign(".Random.seed", parallel::nextRNGStream(tmp01), envir = .GlobalEnv)
+  return(tmp02)
+})
+tmp07 <- do.call(c, Map(list, tmp06[[1]], tmp06[[2]]))
+tmp08 <- as.matrix(data.table::rbindlist(lapply(seq_len(100), function(i) {as.list(table(tmp07[[i]]))}), fill = TRUE))
+tmp08 <- tmp08[, order(as.integer(colnames(tmp08)))]
+tmp08[is.na(tmp08)] <- 0
+tmp09 <- bouncer(f = f, data = data, size = 50L, replace = TRUE, k = 100L, seed = 456L, ncpus = 2L, method = "block")
+tmp10 <- tmp09@oir
+
 testthat::test_that(desc = "bouncer resamples as expected",
                     code = {testthat::expect_identical(object = tmp05,
                                                        expected = tmp03)
+                            
+                            testthat::expect_identical(object = tmp10,
+                                                       expected = tmp08)
           }
 )

@@ -59,8 +59,11 @@ resample <- function(i, data, size, replace, seed, method) {
       data_tmp$id <- rep(seq_len(ncol(id_tmp)), each = nrow(id_tmp))
     }
     
-    # Fit the user-defined model to the resampled data set. 
-    betaij <- f(data = data_tmp)
+    # Fit the user-defined model to the resampled data set.
+    betaij <- tryCatch(expr = f(data = data_tmp),
+                       error = function(e) {NA},
+                       warning = function(w) {resample(data = data, size = size, replace = replace, method = method)}) 
+                       
   
     return(list(seed = seed, oir = oir, betaij = betaij))
   }

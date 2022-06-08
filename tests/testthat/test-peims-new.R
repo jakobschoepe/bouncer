@@ -1,5 +1,17 @@
 testthat::test_that(desc = "bouncer throws an error if arguments are misspecified", 
-                    code = {ncpus <- as.integer(x = parallel::detectCores())
+                    code = {X1 <- rnorm(100)
+                            X2 <- rbinom(100, 1, 0.3)
+                            X3 <- rnorm(100)
+                            X4 <- rbinom(100, 1, 0.5)
+                            b <- model.matrix(~ X1 + X2 + X3 + X4) %*% c(-3.10, 0.00, -0.45, 0.22, -0.16)
+                            Y <- rbinom(100, 1, 1 / (1 + exp(-b)))
+                            data <- data.frame(X1, X2, X3, X4, Y)
+                            f <- function(data) {
+                              null <- glm(Y ~ 1, family = binomial, data = data)
+                              full <- glm(Y ~ ., family = binomial, data = data)
+                              coef(step(null, list(upper = full), direction = "both", trace = 0, k = 2))
+                              }
+                            ncpus <- as.integer(x = parallel::detectCores())
                             testthat::expect_error(object = bouncer(f = NULL, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = ncpus, method = "simple"),
                                                    regexp = "\"f\" must be a function")
                                

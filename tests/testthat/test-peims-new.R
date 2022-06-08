@@ -79,8 +79,7 @@ testthat::test_that(desc = "bouncer throws an error if arguments are misspecifie
           }
 )
 
-RNGkind(kind = "L'Ecuyer-CMRG")
-set.seed(123)
+set.seed(123, kind = "L'Ecuyer-CMRG")
 tmp01 <- lapply(seq_len(2), function(i) {
   tmp01 <- .Random.seed
   tmp02 <- lapply(seq_len(50), function(i) {
@@ -98,8 +97,7 @@ tmp03[is.na(tmp03)] <- 0
 tmp04 <- bouncer(f = f, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = 2L, method = "simple")
 tmp05 <- tmp04@oir
 
-RNGkind(kind = "L'Ecuyer-CMRG")
-set.seed(456)
+set.seed(456, kind = "L'Ecuyer-CMRG")
 tmp06 <- lapply(seq_len(2), function(i) {
   tmp01 <- .Random.seed
   tmp02 <- lapply(seq_len(50), function(i) {

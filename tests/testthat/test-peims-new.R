@@ -95,7 +95,7 @@ tmp02 <- do.call(c, Map(list, tmp01[[1]], tmp01[[2]]))
 tmp03 <- as.matrix(data.table::rbindlist(lapply(seq_len(100), function(i) {as.list(table(tmp02[[i]]))}), fill = TRUE))
 tmp03 <- tmp03[, order(as.integer(colnames(tmp03)))]
 tmp03[is.na(tmp03)] <- 0
-tmp04 <- bouncer(f = f, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = ncpus, method = "simple")
+tmp04 <- bouncer(f = f, data = data, size = 100L, replace = TRUE, k = 100L, seed = 123L, ncpus = 2L, method = "simple")
 tmp05 <- tmp04@oir
 
 testthat::test_that(desc = "bouncer resamples as expected",

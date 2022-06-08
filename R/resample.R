@@ -60,14 +60,7 @@ resample <- function(i, data, size, replace, seed, method) {
     }
     
     # Fit the user-defined model to the resampled data set.
-    betaij <- tryCatch(expr = f(data = data_tmp),
-                       error = function(e) {
-                         print("Error")
-                         NA},
-                       warning = function(w) {
-                         print(warnings())
-                         resample(data = data, size = size, replace = replace, method = method)}) 
-                       
+    betaij <- f(data = data_tmp)
   
     return(list(seed = seed, oir = oir, betaij = betaij))
   }

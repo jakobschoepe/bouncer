@@ -3,7 +3,7 @@ X1 <- rnorm(100)
 X2 <- rbinom(100, 1, 0.3)
 X3 <- rnorm(100)
 X4 <- rbinom(100, 1, 0.5)
-b <- model.matrix(~ X1 + X2 + X3 + X4) %*% c(-3.10, 0.00, -0.45, 0.22, -0.16)
+b <- model.matrix(~ X1 + X2 + X3 + X4) %*% c(-2.10, 0.00, -0.45, 0.22, -0.16)
 Y <- rbinom(100, 1, 1 / (1 + exp(-b)))
 data <- data.frame(X1, X2, X3, X4, Y, id = rep(1:50, times = 2))
 f <- function(data, seed) {

@@ -22,12 +22,12 @@ bouncer <- function(f, data, size, replace, k, seed, ncpus, method, pkgs) {
     stop("\"f\" must be a function")
   }
 
-  else if (!is.element(el = "data", set = names(x = formals(fun = f)))) {
+  else if (!is.element(el = "data", set = names(x = formals(fun = f))) && !is.element(el = "seed", set = names(x = formals(fun = f)))) {
     stop("\"f\" must contain the following argument: \"data\"")
   }
   
-  else if (length(x = names(x = formals(fun = f))) != 1L) {
-    stop("\"f\" should contain only one argument")
+  else if (length(x = names(x = formals(fun = f))) != 2L) {
+    stop("\"f\" should contain only two arguments")
   }
 
   else if (!is.data.frame(x = data)) {

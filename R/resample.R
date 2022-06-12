@@ -17,17 +17,7 @@
 
 resample <- function(i, data, size, replace, seed, method) {
   # If the argument 'seed' is provided, set the kind and the state of the pseudo-random number generator.
-  if (!missing(x = seed)) {
-    if (is.integer(x = seed) & length(x = seed) == 7L) {
-      RNGkind(kind = "L'Ecuyer-CMRG")
-      .Random.seed <<- seed
-    }
-    
-    else {
-      stop("\"seed\" has been misspecified")
-    }
-  }
-  else if (!is.character(x = method)) {
+  if (!is.character(x = method)) {
     stop("\"method\" must be a character string")
   }
   
@@ -43,7 +33,16 @@ resample <- function(i, data, size, replace, seed, method) {
     stop("state for the pseudo-random number generator has not been set")
   }
   
-  else {  
+  else {
+    if (!missing(x = seed)) {
+      if (is.integer(x = seed) & length(x = seed) == 7L) {
+        RNGkind(kind = "L'Ecuyer-CMRG")
+        .Random.seed <<- seed
+      }
+      else {
+        stop("\"seed\" has been misspecified")
+      }
+    }
     # Store the current state of the pseudo-random number generator for reproducability.
     seed <- .Random.seed
     if (method == "simple") {

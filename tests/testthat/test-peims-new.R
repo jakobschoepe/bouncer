@@ -6,11 +6,18 @@ X4 <- rbinom(100, 1, 0.5)
 b <- model.matrix(~ X1 + X2 + X3 + X4) %*% c(-3.10, 0.00, -0.45, 0.22, -0.16)
 Y <- rbinom(100, 1, 1 / (1 + exp(-b)))
 data <- data.frame(X1, X2, X3, X4, Y, id = rep(1:50, times = 2))
-f <- function(data) {
-  null <- glm(Y ~ 1, family = binomial, data = data)
-  full <- glm(Y ~ ., family = binomial, data = data)
-  coef(step(null, list(upper = full), direction = "both", trace = 0, k = 2))
-  }
+f <- function(data, seed) {
+  out <- tryCatch(expr = {
+                    y <- data$Y
+                    X <- as.matrix(data[,Y := NULL])
+                    tmp <- glmnet::cv.glmnet(x = X, y = y, family = "binomial", alpha = 1, type.measure = "class", penalty.factor = c(0,1,1,1), standardize = FALSE)
+                    coef(tmp)[,1]
+                  },
+                  error = function(cond) {message(".Random.seed: c(", sapply(seq_len(7), function(i) {paste0(seed[i], ifelse(i < 7, "L, ", "L"))}), ")\n", cond)},
+                  warning = function(cond) {message(".Random.seed: c(", sapply(seq_len(7), function(i) {paste0(seed[i], ifelse(i < 7, "L, ", "L"))}), ")\n", cond)})
+  return(out)
+}
+
 ncpus <- as.integer(x = parallel::detectCores())
 
 testthat::test_that(desc = "bouncer throws an error if arguments are misspecified", 

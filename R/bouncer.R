@@ -23,11 +23,11 @@ bouncer <- function(f, data, size, replace, k, seed, ncpus, method, pkgs) {
   }
 
   else if (!is.element(el = "data", set = names(x = formals(fun = f))) && !is.element(el = "seed", set = names(x = formals(fun = f)))) {
-    stop("\"f\" must contain the following argument: \"data\"")
+    stop("\"f\" must contain the following arguments: \"data\" and \"seed\"")
   }
   
   else if (length(x = names(x = formals(fun = f))) != 2L) {
-    stop("\"f\" should contain only two arguments")
+    stop("\"f\" should contain two arguments: \"data\" and \"seed\"")
   }
 
   else if (!is.data.frame(x = data)) {
@@ -124,7 +124,7 @@ bouncer <- function(f, data, size, replace, k, seed, ncpus, method, pkgs) {
         parallel::stopCluster(cl = cluster)
         stop("\"pkgs\" must be a character vector")
       }
-      else if (!(pkgs %in% rownames(x = installed.packages()))) {
+      else if (all(!(pkgs %in% rownames(x = installed.packages())))) {
         parallel::stopCluster(cl = cluster)
         stop("required package(s) not found in library")
       }

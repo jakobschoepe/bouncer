@@ -62,6 +62,6 @@ resample <- function(i, data, size, replace, seed, method) {
     # Fit the user-defined model to the resampled data set.
     betaij <- f(data = data_tmp)
   
-    return(list(seed = seed, oir = oir, betaij = betaij))
+    return(list(seed = seed, oir = if (is.null(betaij)) {NULL} else {oir}, betaij = betaij))
   }
 }

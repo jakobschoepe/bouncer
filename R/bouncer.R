@@ -116,7 +116,7 @@ bouncer <- function(f, data, size, replace, k, seed, ncpus, method, pkgs) {
   
   else {
     # Set up a cluster for parallel processing to speed up resampling and model fitting
-    cluster <- parallel::makePSOCKcluster(names = ncpus)
+    cluster <- parallel::makePSOCKcluster(names = ncpus, outfile = "log.txt")
 
     # Load required packages on each node to initialize parallel processing
     if (!missing(x = pkgs)) {

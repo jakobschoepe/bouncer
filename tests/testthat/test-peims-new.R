@@ -18,6 +18,18 @@ f <- function(data, seed) {
   return(out)
 }
 
+f2 <- function(data, seed) {
+  out <- tryCatch(expr = {
+                    y <- glmnet::stratifySurv(y = Surv(start = rep(0, times = length(y)), stop = rep(1, times = length(y)), event = data$Y), strata = data$id)
+                    X <- as.matrix(subset(data, select = -c(Y, id)))
+                    tmp <- glmnet::cv.glmnet(x = X, y = y, family = "cox", alpha = 1, type.measure = "class", penalty.factor = c(0,1,1,1), standardize = FALSE)
+                    coef(tmp)[,1]
+                  },
+                  error = function(cond) {message(".Random.seed: c(", sapply(seq_len(7), function(i) {paste0(seed[i], ifelse(i < 7, "L, ", "L"))}), ")\n", cond)},
+                  warning = function(cond) {message(".Random.seed: c(", sapply(seq_len(7), function(i) {paste0(seed[i], ifelse(i < 7, "L, ", "L"))}), ")\n", cond)})
+  return(out)                                                 
+}
+
 ncpus <- as.integer(x = parallel::detectCores())
 
 testthat::test_that(desc = "bouncer throws an error if arguments are misspecified", 

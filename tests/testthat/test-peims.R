@@ -10,7 +10,7 @@ data02 <- data.frame(X1, X2, X3, X4, Y = rep(0:1, each = 50), id = rep(1:50, tim
 f01 <- function(data, seed) {
   out <- tryCatch(expr = {
                     y <- data$Y
-                    X <- as.matrix(subset(data, select = -c(Y, id)))
+                    X <- as.matrix(subset(data, select = -c(Y)))
                     tmp <- glmnet::cv.glmnet(x = X, y = y, family = "binomial", alpha = 1, type.measure = "class", penalty.factor = c(0,1,1,1), standardize = FALSE)
                     coef(tmp)[,1]
                   },

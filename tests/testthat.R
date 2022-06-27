@@ -1,4 +1,4 @@
-library(peims)
+library(bouncer)
 library(testthat)
 
-test_check(package = "peims")
+test_check(package = "bouncer")
